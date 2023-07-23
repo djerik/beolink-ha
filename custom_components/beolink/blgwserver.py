@@ -115,11 +115,6 @@ class BLGWServer:
             sorted_resources.sort(key=lambda x: x.get('name'))
             bl_zone.resources = sorted_resources
 
-        #for bl_zone_key in bl_zones.keys():
-            #sorted_resources = list(bl_ressources[bl_zone_key].values())
-            #sorted_resources.sort(key=lambda x: x.get('name'))
-            #bl_zones[bl_zone_key].resources = sorted_resources
-
         house_area = Area("House")
         sorted_zones = list(bl_zones.values())
         sorted_zones.sort( key=lambda x: x.name)
