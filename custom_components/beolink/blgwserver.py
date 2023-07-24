@@ -46,8 +46,9 @@ class BLGWServer:
                             'boundary=%s'% boundary,
         })
         await response.prepare(request)
-        cameras = self.hass.data["camera"].entities
-        camera = next(x for x in cameras if x.name == request.match_info['camera_name'])
+        states = self.hass.states.async_all()
+        camera_state = next(x for x in states if x.attributes["friendly_name"] == request.match_info['camera_name'])
+        camera = self.hass.data["camera"].get_entity(camera_state.entity_id)
 
         while True:
             image_cb = await camera.async_camera_image()
@@ -67,23 +68,29 @@ class BLGWServer:
         bl_zones : dict[str, Zone] = {}
         bl_ressources : dict[str, dict[str, object]] = {}
 
-        states =    self.hass.states.async_all()
+        states = self.hass.states.async_all()
         for state in states:
             if state.domain in {"cover","light","camera","climate"}:
                 entity = self.hass.data[state.domain].get_entity(state.entity_id)
+                if( entity is None):
+                    continue
                 area_id = entity.registry_entry.area_id
                 if area_id is None:
                     device = dr_reg.async_get(entity.registry_entry.device_id)
+                    if( device is None ):
+                        continue
                     area_id = device.area_id
                     if( area_id is None):
                         continue
                 if area_id not in bl_zones:
                     area = area_reg.async_get_area(area_id)
+                    if( area is None):
+                        continue
                     bl_zones[area_id] = Zone(area.name, "house", False, False, {})
                     bl_ressources[area_id] = {}
                 if( state.domain == COVER_DOMAIN ):
                     shade = {   "type" : "SHADE",
-                                    "name": entity.device_info["name"],
+                                    "name": state.attributes["friendly_name"],
                                     "id": entity.entity_id,
                                     "systemAddress": "HomeAssistant",
                                     "hide": False,
@@ -93,7 +100,7 @@ class BLGWServer:
                     bl_ressources[area_id][state.entity_id] = shade
                 if( state.domain == LIGHT_DOMAIN ):
                     dimmer = {   "type" : "DIMMER",
-                                    "name": entity.device_info["name"],
+                                    "name": state.attributes["friendly_name"],
                                     "id": entity.entity_id,
                                     "systemAddress": "HomeAssistant",
                                     "hide": False,
@@ -104,7 +111,7 @@ class BLGWServer:
                 if( state.domain == CAMERA_DOMAIN ):
                     camera = {
                                 "type": "CAMERA",
-                                "name": entity.name,
+                                "name": state.attributes["friendly_name"],
                                 "rtspSupport": False,
                                 "commands": []
                              }
