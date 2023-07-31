@@ -3,6 +3,17 @@
     "step": {
       "user": {
         "data": {
+          "beolink_name" : "BeoLink Navn"
+        },
+        "description": "Indtast BeoLink informationer",
+        "title": "Konfiguration"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
           "beolink_name" : "BeoLink Name"
         },
         "description": "Indtast BeoLink informationer",

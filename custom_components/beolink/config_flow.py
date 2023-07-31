@@ -1,39 +1,65 @@
+from __future__ import annotations
+
 import random
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
-from homeassistant import config_entries
-import homeassistant.helpers.config_validation as cv
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
+from homeassistant.data_entry_flow import FlowResult
+from homeassistant.core import callback
+
 import voluptuous as vol
 
 from .const import DOMAIN, CONF_BEOLINK_NAME, CONF_SERIAL_NUMBER
 
-BEOLINK_SCHEMA = vol.Schema({vol.Required(CONF_BEOLINK_NAME,default="BLGW"): cv.string})
+BEOLINK_CREATE_SCHEMA = vol.Schema({vol.Required(CONF_BEOLINK_NAME,default="BLGW"): str})
 
-class BeoLinkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    data: Optional[Dict[str, Any]]
+class BeoLinkConfigFlow(ConfigFlow, domain=DOMAIN):
+    data: Optional[dict[str, Any]]
 
-    async def async_step_user(self, user_input: Optional[Dict[str, Any]] = None):
+    async def async_step_user(self, user_input: Optional[dict[str, Any]] = None):
         """Invoked when a user initiates a flow via the user interface."""
-        errors: Dict[str, str] = {}
         if user_input is not None:
             self.data = user_input
             self.data[CONF_SERIAL_NUMBER] = random.randrange(24000000, 25000000)
-            return await self.async_create_entry(title="BeoLink", data=self.data)
+            return self.async_create_entry(title="BeoLink", data=self.data)
         return self.async_show_form(
-            step_id="user", data_schema=BEOLINK_SCHEMA, errors=errors
+            step_id="user", data_schema=BEOLINK_CREATE_SCHEMA
         )
 
-    async def async_step_reauth(self, user_input=None):
-        return await self.async_step_user()
+    @staticmethod
+    @callback
+    def async_get_options_flow( config_entry: ConfigEntry) -> BeoLinkOptionsFlowHandler:
+        """Get the options flow for this handler."""
+        return BeoLinkOptionsFlowHandler(config_entry)
 
-    async def async_create_entry(self, title: str, data: dict) -> dict:
-        """Create an oauth config entry or update existing entry for reauth."""
-        # TODO: This example supports only a single config entry. Consider
-        # any special handling needed for multiple config entries.
-        existing_entry = await self.async_set_unique_id(data[CONF_SERIAL_NUMBER])
-        if existing_entry:
-            self.hass.config_entries.async_update_entry(existing_entry, data=data)
-            await self.hass.config_entries.async_reload(existing_entry.entry_id)
-            return self.async_abort(reason="reauth_successful")
-        return super().async_create_entry(title=title, data=data)
+
+class BeoLinkOptionsFlowHandler(OptionsFlow):
+    """Handle BeoLink options."""
+
+    def __init__(self, config_entry: ConfigEntry) -> None:
+        """Initialize BeoLink options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage BeoLink options."""
+
+        if user_input is not None:
+            user_input[CONF_SERIAL_NUMBER] = self.config_entry.data[CONF_SERIAL_NUMBER]
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, data=user_input, options=self.config_entry.options
+            )
+            return self.async_create_entry(title="", data={})
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_BEOLINK_NAME,
+                        default=self.config_entry.data.get(CONF_BEOLINK_NAME),
+                    ): str
+                }
+            )
+        )

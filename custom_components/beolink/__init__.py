@@ -49,7 +49,6 @@ async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.Con
         "sn": entry.data[CONF_SERIAL_NUMBER],
         "swver": "1.5.4.557",
         "timestamp": int(time.time()),
-        "Name": "1703.1170366."+entry.data[CONF_BEOLINK_NAME]+"@products.bang-olufsen.com._beocore._tcp.local",
     }
 
     local_address = get_local_address()

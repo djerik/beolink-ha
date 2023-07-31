@@ -9,5 +9,16 @@
         "title": "Configuration"
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "beolink_name" : "BeoLink Name"
+        },
+        "description": "Enter your BeoLink information",
+        "title": "Configuration"
+      }
+    }
   }
 }
