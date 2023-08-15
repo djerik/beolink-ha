@@ -12,6 +12,8 @@ from homeassistant import config_entries, core
 
 from homeassistant.components import zeroconf
 
+from homeassistant.helpers import instance_id
+
 from homeassistant.auth.providers.homeassistant import HassAuthProvider
 
 from .hipserver import HIPServer
@@ -41,6 +43,8 @@ async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.Con
 
     zeroconf_instance = await zeroconf.async_get_instance(hass)
 
+    uuid = await instance_id.async_get(hass)
+
     desc = {
         "hipport": "9100",
         "path": "/blgwpservices.json",
@@ -59,10 +63,10 @@ async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.Con
         addresses=[socket.inet_aton(local_address)],
         port=80,
         properties=desc,
-        server="blgw.local.",
+        server= uuid+".local.",
     )
 
-    await zeroconf_instance.async_register_service(info, cooperating_responders=False)
+    await zeroconf_instance.async_register_service(info, allow_name_change=True)
 
     return True
 
