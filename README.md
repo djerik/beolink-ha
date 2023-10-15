@@ -10,16 +10,14 @@ Afterwards you can go to the Integrations sections and click the add integration
 
 You will be asked to name your BeoLink Bridge. This is the name you will see in the app.
 
-It will automatically lookup all supported entities and expose them to BeoLink app use. ZereConf might not be working yet, so you will need to add the BeoLink Bridge to the app manually, by entering the IP of your Home Assistant installation in the App under Settings -> "+"
+It will automatically lookup all supported entities and expose them to BeoLink app use. An entity or device must be added to an Area in order to show up in the Beoliving app. ZereConf might not be working yet, so you will need to add the BeoLink Bridge to the app manually, by entering the IP of your Home Assistant installation in the App under Settings -> "+"
 
 ## Changelog
 - 2023-07-23 Initial Version
+- 2023-10-14 Major Release adding support for BeoPlay devices via the BeoPlay components. Added support for native HA Thermostats & Alarm
 
 ## Known limitations
-- B&O and other audio devices not yet supported
+- Only BeoPlay devices are supported via the BeoPlay component https://github.com/giachello/beoplay
 - Display of surveilance cameras on B&O TVs not yet implemented
 - RTSP streaming of cameras not implemented. MJPEG is working as fallback solution
-- Thermostats are under implementation
 - Scenes are under implementation
-- Lights: Set color not working/supported
-- Security not yet implemented
