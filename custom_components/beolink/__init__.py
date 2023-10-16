@@ -20,7 +20,7 @@ from .hipserver import HIPServer
 
 from .blgwserver import CustomBasicAuth, BLGWServer
 
-from .const import DOMAIN, CONF_BEOLINK_NAME, CONF_SERIAL_NUMBER
+from .const import DOMAIN, CONF_BEOLINK_NAME, CONF_SERIAL_NUMBER, CONF_BLGW_SERVER_PORT
 
 from aiohttp import web
 
@@ -38,7 +38,7 @@ async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.Con
     app.router.add_routes( [web.get('/blgwpservices.json', server.blgwpservices),web.get('/a/view/House/{zone}/CAMERA/{camera_name}/mjpeg', server.camera_mjpeg)] )
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite( runner, None, 80)
+    site = web.TCPSite( runner, None, entry.data.get( CONF_BLGW_SERVER_PORT, 80))
     await site.start()
 
     zeroconf_instance = await zeroconf.async_get_instance(hass)

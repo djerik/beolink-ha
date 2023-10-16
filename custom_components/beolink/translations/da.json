@@ -14,7 +14,8 @@
     "step": {
       "init": {
         "data": {
-          "beolink_name" : "BeoLink Name"
+          "beolink_name" : "BeoLink Name",
+          "blgw_server_port" : "BeoLink Gateway Server Port"
         },
         "description": "Indtast BeoLink informationer",
         "title": "Konfiguration"

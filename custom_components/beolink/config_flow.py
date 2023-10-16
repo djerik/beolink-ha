@@ -10,9 +10,9 @@ from homeassistant.core import callback
 
 import voluptuous as vol
 
-from .const import DOMAIN, CONF_BEOLINK_NAME, CONF_SERIAL_NUMBER
+from .const import DOMAIN, CONF_BEOLINK_NAME, CONF_SERIAL_NUMBER, CONF_BLGW_SERVER_PORT
 
-BEOLINK_CREATE_SCHEMA = vol.Schema({vol.Required(CONF_BEOLINK_NAME,default="BLGW"): str})
+BEOLINK_CREATE_SCHEMA = vol.Schema({vol.Required(CONF_BEOLINK_NAME,default="BLGW"): str, vol.Required(CONF_BLGW_SERVER_PORT,default=80): int})
 
 class BeoLinkConfigFlow(ConfigFlow, domain=DOMAIN):
     data: Optional[dict[str, Any]]
@@ -59,7 +59,7 @@ class BeoLinkOptionsFlowHandler(OptionsFlow):
                     vol.Required(
                         CONF_BEOLINK_NAME,
                         default=self.config_entry.data.get(CONF_BEOLINK_NAME),
-                    ): str
+                    ): str, vol.Required(CONF_BLGW_SERVER_PORT,default=self.config_entry.data.get(CONF_BLGW_SERVER_PORT)): int
                 }
             )
         )

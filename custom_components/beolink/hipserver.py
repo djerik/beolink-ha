@@ -95,6 +95,7 @@ class HIPRessource:
     """Representation of af HIP Ressource"""
 
     def __init__(self, domain, entity, entity_name, area_name, features) -> None:
+        """Init HIPRessource"""
         self.domain = domain
         self.entity = entity
         self.entity_id = entity.entity_id
@@ -126,6 +127,7 @@ class HIPRessource:
         self.state_path = self.path + "STATE_UPDATE?"
 
     def state_updates(self, state, attributes : dict) -> list:
+        """Generate state update"""
         states = list()
         if self.domain == COVER_DOMAIN:
             if self.features & CoverEntityFeature.SET_POSITION:
