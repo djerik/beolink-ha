@@ -92,7 +92,6 @@ class BLGWServer:
                 MEDIA_PLAYER_DOMAIN,
             }:
                 entity = self.hass.data[state.domain].get_entity(state.entity_id)
-                counter = 0
                 if entity is None:
                     continue
                 area_id = entity.registry_entry.area_id

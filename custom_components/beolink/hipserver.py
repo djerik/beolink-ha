@@ -112,6 +112,7 @@ class HIPRessource:
             self.hip_type = "ALARM"
         elif self.domain == MEDIA_PLAYER_DOMAIN:
             self.hip_type = "AV renderer"
+            self.product_id = None
             if entity.platform.platform_name == "beoplay":
                 self.product_id = entity._type_number + "."+ entity._item_number+ "." + entity._serial_number + "@products.bang-olufsen.com"
 
@@ -146,13 +147,13 @@ class HIPRessource:
             states.append(self.state_path + "MODE=Auto")
             states.append(self.state_path + "FAN AUTO=true")
         elif self.domain == LIGHT_DOMAIN:
-            if "brightness" in attributes:
+            if ATTR_BRIGHTNESS_PCT in attributes:
                 states.append(
                     self.state_path + "LEVEL=" + str(attributes[ATTR_BRIGHTNESS_PCT])
                 )
             else:
                 states.append(self.state_path + "LEVEL=0")
-            if "hs_color" in attributes:
+            if ATTR_HS_COLOR in attributes:
                 states[0] = (
                     states[0]
                     + "&COLOR=hsv("
@@ -160,7 +161,8 @@ class HIPRessource:
                     + ","
                     + str(round(attributes[ATTR_HS_COLOR][1]))
                     + ","
-                    + str(attributes[ATTR_BRIGHTNESS_PCT])
+                    #+ str(attributes[ATTR_BRIGHTNESS_PCT])
+                    + "100"
                     + ")"
                 )
         elif self.domain == ALARM_DOMAIN:
@@ -287,6 +289,8 @@ class HIPServer(asyncio.Protocol):
                                 if area_id is None:
                                     continue
                             area = area_reg.async_get_area(area_id)
+                            if area is None:
+                                continue
                             ressource = HIPRessource(
                                 state.domain,
                                 entity,
