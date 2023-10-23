@@ -1,6 +1,7 @@
 {
   "domain": "beolink",
   "name": "BeoLink",
+  "after_dependencies": ["camera", "zeroconf"],  
   "codeowners": ["@djerik"],
   "config_flow": true,
   "dependencies": [],
