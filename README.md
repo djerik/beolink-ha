@@ -10,7 +10,9 @@ Afterwards you can go to the Integrations sections and click the add integration
 
 You will be asked to name your BeoLink Bridge. This is the name you will see in the app.
 
-It will automatically lookup all supported entities and expose them to BeoLink app use. An entity or device must be added to an Area in order to show up in the Beoliving app. ZereConf might not be working yet, so you will need to add the BeoLink Bridge to the app manually, by entering the IP of your Home Assistant installation in the App under Settings -> "+"
+It will automatically lookup all supported entities and expose them to BeoLink app use. An entity or device must be added to an Area in order to show up in the Beoliving app. ZereConf might not be working in your network configuration, in wich case you will need to add the BeoLink Bridge to the app manually, by entering the IP of your Home Assistant installation in the App under Settings -> "+"
+
+You login using your Home Assistant user name and password.
 
 ## Changelog
 - 2023-07-23 Initial Version
