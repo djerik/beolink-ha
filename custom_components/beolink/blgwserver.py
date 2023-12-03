@@ -1,8 +1,13 @@
 """Module for returning data formatted in json"""
+import ipaddress
 import jsonpickle
 from .model.blgwpwebservices import Zone, Area, blgwpwebservices
 
-from homeassistant.auth.providers.homeassistant import HassAuthProvider, InvalidAuth
+from homeassistant.auth.providers.homeassistant import HassAuthProvider, InvalidAuth, AuthProvider
+
+from homeassistant.auth import InvalidAuthError
+
+from homeassistant.auth.providers.trusted_networks import TrustedNetworksAuthProvider
 
 from homeassistant import core
 
@@ -24,18 +29,28 @@ from aiohttp_basicauth import BasicAuthMiddleware
 class CustomBasicAuth(BasicAuthMiddleware):
     """Class for handlig authentication against Home Assistant users"""
 
-    def __init__(self, provider: HassAuthProvider) -> None:
+    def __init__(self, providers: list[AuthProvider]) -> None:
         """Init CustomBasicAuth"""
-        self.provider = provider
+        self.providers = providers
         super().__init__()
 
     async def check_credentials(self, username, password, request):
-        """Checks credentials against Home Assistant"""
-        try:
-            await self.provider.async_validate_login(username, password)
-            return True
-        except InvalidAuth:
-            return False
+        """Checks ip / credentials against Home Assistant"""
+        for provider in self.providers:
+            if isinstance (provider, TrustedNetworksAuthProvider):
+                ip = ipaddress.ip_address(request.remote)
+                try:
+                    provider.async_validate_access(ip)
+                except InvalidAuthError:
+                    return False
+                return True
+            elif isinstance (provider, HassAuthProvider):
+                try:
+                    await provider.async_validate_login(username, password)
+                except InvalidAuth:
+                    return False
+                return True
+        return False
 
 
 class BLGWServer:

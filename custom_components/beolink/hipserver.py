@@ -1,8 +1,9 @@
 """Module for handling the tcp communication"""
 import asyncio
+import ipaddress
 
 from urllib.parse import unquote, quote, parse_qs
-from typing import Any, cast
+from typing import Any
 
 from homeassistant import core
 from homeassistant.core import Context, CALLBACK_TYPE, callback
@@ -55,6 +56,10 @@ from homeassistant.components.media_player import (
 from homeassistant.components.remote import ( SERVICE_SEND_COMMAND, DOMAIN as REMOTE_DOMAIN )
 
 from homeassistant.auth.providers.homeassistant import HassAuthProvider, InvalidAuth
+
+from homeassistant.auth.providers.trusted_networks import TrustedNetworksAuthProvider
+
+from homeassistant.auth import InvalidAuthError
 
 from homeassistant.const import (
     ATTR_ENTITY_ID,
@@ -200,7 +205,7 @@ class HIPServer(asyncio.Protocol):
     def __init__(self, hass: core.HomeAssistant) -> None:
         """Init HIPServer"""
         self.hass = hass
-        self.provider = cast(HassAuthProvider, self.hass.auth.auth_providers[0])
+        self.providers = self.hass.auth.auth_providers
         self.user = ""
         self.transport = None
         self._subscriptions: list[CALLBACK_TYPE] = []
@@ -236,13 +241,26 @@ class HIPServer(asyncio.Protocol):
             self._subscriptions.pop()()
 
     async def check_login(self, username, password):
-        """Checking login againts Home Assistant"""
-        try:
-            await self.provider.async_validate_login(username, password)
-        except InvalidAuth:
-            return False
-        self.state = "authenticated"
-        self.send(b"\r\n")
+        """Checks ip / credentials against Home Assistant"""
+        for provider in self.providers:
+            if isinstance (provider, TrustedNetworksAuthProvider):
+                ip = ipaddress.ip_address(self.transport.get_extra_info('peername')[0])
+                try:
+                    provider.async_validate_access(ip)
+                except InvalidAuthError:
+                    return False
+                self.state = "authenticated"
+                self.send(b"\r\n")
+                return True
+            elif isinstance (provider, HassAuthProvider):
+                try:
+                    await provider.async_validate_login(username, password)
+                except InvalidAuth:
+                    return False
+                self.state = "authenticated"
+                self.send(b"\r\n")
+                return True
+        return False
 
     def data_received(self, data):
         """Data received from BeoLiving app"""

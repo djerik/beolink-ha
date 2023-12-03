@@ -32,7 +32,7 @@ async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.Con
     server = await loop.create_server(lambda: HIPServer(hass), None, 9100)
 
     providers = hass.auth.auth_providers
-    auth = CustomBasicAuth(cast(HassAuthProvider, providers[0]))
+    auth = CustomBasicAuth(cast(HassAuthProvider, providers))
     server = BLGWServer(entry.data[CONF_BEOLINK_NAME],entry.data[CONF_SERIAL_NUMBER],hass)
     app = web.Application(middlewares=[auth])
     app.router.add_routes( [web.get('/blgwpservices.json', server.blgwpservices),web.get('/a/view/House/{zone}/CAMERA/{camera_name}/mjpeg', server.camera_mjpeg)] )
