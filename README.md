@@ -15,6 +15,7 @@ It will automatically lookup all supported entities and expose them to BeoLink a
 ## Changelog
 - 2023-07-23 Initial Version
 - 2023-10-14 Major Release adding support for BeoPlay devices via the BeoPlay components. Added support for native HA Thermostats & Alarm
+- 2023-12-03 Added support for TrustedNetworksAuthProvider
 
 ## Known limitations
 - Only BeoPlay devices are supported via the BeoPlay component https://github.com/giachello/beoplay
