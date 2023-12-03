@@ -1,12 +1,13 @@
 {
   "domain": "beolink",
   "name": "BeoLink",
+  "after_dependencies": ["camera", "zeroconf"],  
   "codeowners": ["@djerik"],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/djerik/beolink-ha",
+  "iot_class": "local_push",
   "issue_tracker": "https://github.com/djerik/beolink-ha/issues",
-  "version": "0.1.1",
   "requirements": ["aiohttp_basicauth","jsonpickle"],
-  "iot_class": "local_push"
+  "version": "0.2.2"
 }
