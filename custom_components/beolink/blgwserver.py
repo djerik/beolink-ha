@@ -106,8 +106,11 @@ class BLGWServer:
                 ALARM_DOMAIN,
                 MEDIA_PLAYER_DOMAIN,
             }:
-                entity = self.hass.data[state.domain].get_entity(state.entity_id)
-                if entity is None:
+                domain = self.hass.data.get(state.domain)
+                if( domain is None):
+                    continue
+                entity = domain.get_entity(state.entity_id)
+                if entity is None or entity.registry_entry is None:
                     continue
                 area_id = entity.registry_entry.area_id
                 if area_id is None:
