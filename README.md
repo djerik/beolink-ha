@@ -1,6 +1,7 @@
 # BeoLink Bridge for Home Assistant
 
 ## Requirements
+- Port 80 available or knowledge of how to create proxy setup
 - BeoLink app installed on your iOS device
 
 ## Installation
@@ -18,6 +19,7 @@ You login using your Home Assistant user name and password.
 - 2023-07-23 Initial Version
 - 2023-10-14 Major Release adding support for BeoPlay devices via the BeoPlay components. Added support for native HA Thermostats & Alarm
 - 2023-12-03 Added support for TrustedNetworksAuthProvider
+- 2023-12-23 Improved handling of None object references
 
 ## Known limitations
 - Only BeoPlay devices are supported via the BeoPlay component https://github.com/giachello/beoplay
