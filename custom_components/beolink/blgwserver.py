@@ -114,6 +114,10 @@ class BLGWServer:
                 entity = domain.get_entity(state.entity_id)
                 if entity is None or entity.registry_entry is None:
                     continue
+                if entity.device_info is None or "Name" not in entity.device_info:
+                    message = f"Entity {entity.entity_id} has no device_info or no entity name"
+                    _LOGGER.info( message )
+                    continue
                 area_id = entity.registry_entry.area_id
                 if area_id is None:
                     device = dr_reg.async_get(entity.registry_entry.device_id)
