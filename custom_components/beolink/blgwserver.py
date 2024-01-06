@@ -1,41 +1,43 @@
-"""Module for returning data formatted in json"""
+"""Module for returning data formatted in json."""
 import ipaddress
+import json
+import logging
+
+from aiohttp import MultipartWriter, web
+from aiohttp_basicauth import BasicAuthMiddleware
 import jsonpickle
-from .model.blgwpwebservices import Zone, Area, blgwpwebservices
-
-from homeassistant.auth.providers.homeassistant import HassAuthProvider, InvalidAuth, AuthProvider
-
-from homeassistant.auth import InvalidAuthError
-
-from homeassistant.auth.providers.trusted_networks import TrustedNetworksAuthProvider
 
 from homeassistant import core
-
-from homeassistant.helpers import device_registry as dr, area_registry as ar
-
-from homeassistant.components.cover import DOMAIN as COVER_DOMAIN, CoverEntityFeature
-from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
+from homeassistant.auth import InvalidAuthError
+from homeassistant.auth.providers.homeassistant import (
+    AuthProvider,
+    HassAuthProvider,
+    InvalidAuth,
+)
+from homeassistant.auth.providers.trusted_networks import TrustedNetworksAuthProvider
+from homeassistant.components.alarm_control_panel import DOMAIN as ALARM_DOMAIN
 from homeassistant.components.camera import DOMAIN as CAMERA_DOMAIN
 from homeassistant.components.climate import DOMAIN as CLIMATE_DOMAIN
+from homeassistant.components.cover import DOMAIN as COVER_DOMAIN, CoverEntityFeature
+from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_DOMAIN
-from homeassistant.components.alarm_control_panel import DOMAIN as ALARM_DOMAIN
-
 from homeassistant.const import ATTR_SUPPORTED_FEATURES
+from homeassistant.helpers import area_registry as ar, device_registry as dr
 
-from aiohttp import web, MultipartWriter
-from aiohttp_basicauth import BasicAuthMiddleware
+from .model.blgwpwebservices import Area, Zone, blgwpwebservices
 
+_LOGGER = logging.getLogger(__name__)
 
 class CustomBasicAuth(BasicAuthMiddleware):
-    """Class for handlig authentication against Home Assistant users"""
+    """Class for handlig authentication against Home Assistant users."""
 
     def __init__(self, providers: list[AuthProvider]) -> None:
-        """Init CustomBasicAuth"""
+        """Init CustomBasicAuth."""
         self.providers = providers
         super().__init__()
 
     async def check_credentials(self, username, password, request):
-        """Checks ip / credentials against Home Assistant"""
+        """Check ip / credentials against Home Assistant."""
         for provider in self.providers:
             if isinstance (provider, TrustedNetworksAuthProvider):
                 ip = ipaddress.ip_address(request.remote)
@@ -54,16 +56,16 @@ class CustomBasicAuth(BasicAuthMiddleware):
 
 
 class BLGWServer:
-    """Handles BLGW HTTP requests"""
+    """Handles BLGW HTTP requests."""
 
     def __init__(self, name, serial_number, hass: core.HomeAssistant) -> None:
-        """Init BLGWServer"""
+        """Init BLGWServer."""
         self.hass = hass
         self.name = name
         self.serial_number = serial_number
 
     async def camera_mjpeg(self, request):
-        """Handles a mjpeg stream"""
+        """Handle a mjpeg stream."""
         boundary = "myboundary"
         response = web.StreamResponse(
             status=200,
@@ -89,7 +91,7 @@ class BLGWServer:
             await response.drain()
 
     async def blgwpservices(self, request):
-        """Handles the blgwpservices.json retult"""
+        """Handle the blgwpservices.json request."""
         dr_reg = dr.async_get(self.hass)
         area_reg = ar.async_get(self.hass)
         bl_areas: dict[str, Area] = {}
@@ -153,9 +155,12 @@ class BLGWServer:
                         "id": entity.entity_id,
                         "systemAddress": "HomeAssistant",
                         "hide": False,
-                        "commands": ["SET", "SET COLOR"],
-                        "states": ["COLOR", "LEVEL"],
+                        "commands": ["SET"],
+                        "states": ["LEVEL"],
                     }
+                    if( entity.supported_color_modes is not None ):
+                        dimmer['commands'].append("SET COLOR")
+                        dimmer['states'].append("COLOR")
                     bl_ressources[area_id][state.entity_id] = dimmer
                 if state.domain == CAMERA_DOMAIN:
                     camera = {
@@ -199,23 +204,28 @@ class BLGWServer:
                     sources = await entity._speaker.async_getReq("BeoZone/Zone/Sources")
                     bl_sources = []
                     if sources:
-                        for source in sources['sources']:
-                            bl_source = {
-                                "name": source[1]["friendlyName"],
-                                "uiType": "0.2",
-                                "code": "HDMI",
-                                "format": "F0",
-                                "networkBit": False,
-                                "select": {
-                                    "cmds": [
-                                        "Select source by id?"+source[1]["id"]
-                                    ]
-                                },
-                                "sourceId": source[1]["id"],
-                                "sourceType": source[1]["sourceType"]["type"],
-                                "profiles": "",
-                            }
-                            bl_sources.append(bl_source)
+                        try:
+                            for source in sources['sources']:
+                                if 1 in source and "id" in source[1]:
+                                    bl_source = {
+                                        "name": source[1]["friendlyName"],
+                                        "uiType": "0.2",
+                                        "code": "HDMI",
+                                        "format": "F0",
+                                        "networkBit": False,
+                                        "select": {
+                                            "cmds": [
+                                                "Select source by id?"+source[1]["id"]
+                                            ]
+                                        },
+                                        "sourceId": source[1]["id"],
+                                        "sourceType": source[1]["sourceType"]["type"],
+                                        "profiles": "",
+                                    }
+                                    bl_sources.append(bl_source)
+                        except Exception as err:
+                            error_text = f"Problems handling sources for entity: {entity.name}. Sources: {json.dumps(sources)}. Error: {err}"
+                            _LOGGER.exception(error_text)
                     media_player = {
                         "type": "AV renderer",
                         "name": state.attributes["friendly_name"],

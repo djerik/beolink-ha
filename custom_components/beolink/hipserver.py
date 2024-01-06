@@ -1,84 +1,71 @@
-"""Module for handling the tcp communication"""
+"""Module for handling the tcp communication."""
+import logging
 import asyncio
 import ipaddress
-
-from urllib.parse import unquote, quote, parse_qs
 from typing import Any
+from urllib.parse import parse_qs, quote, unquote
 
 from homeassistant import core
-from homeassistant.core import Context, CALLBACK_TYPE, callback
-
-from homeassistant.helpers import (
-    device_registry as dr,
-    area_registry as ar,
-)
-
-from homeassistant.helpers.event import (
-    EventStateChangedData,
-    async_track_state_change_event,
-)
-
-from homeassistant.helpers.typing import EventType
-
-from homeassistant.components.cover import (
-    DOMAIN as COVER_DOMAIN,
-    CoverEntityFeature,
-    ATTR_POSITION,
-    ATTR_CURRENT_POSITION,
-)
-
-from homeassistant.components.light import (
-    DOMAIN as LIGHT_DOMAIN,
-    ATTR_BRIGHTNESS_PCT,
-    ATTR_HS_COLOR,
-)
-
-from homeassistant.components.climate import (
-    DOMAIN as CLIMATE_DOMAIN,
-    SERVICE_SET_TEMPERATURE,
-    ATTR_TEMPERATURE,
-)
-
+from homeassistant.auth import InvalidAuthError
+from homeassistant.auth.providers.homeassistant import HassAuthProvider, InvalidAuth
+from homeassistant.auth.providers.trusted_networks import TrustedNetworksAuthProvider
 from homeassistant.components.alarm_control_panel import (
+    DOMAIN as ALARM_DOMAIN,
     SERVICE_ALARM_ARM_AWAY,
     SERVICE_ALARM_ARM_HOME,
     SERVICE_ALARM_DISARM,
-    DOMAIN as ALARM_DOMAIN,
 )
-
+from homeassistant.components.climate import (
+    ATTR_TEMPERATURE,
+    DOMAIN as CLIMATE_DOMAIN,
+    SERVICE_SET_TEMPERATURE,
+)
+from homeassistant.components.cover import (
+    ATTR_CURRENT_POSITION,
+    ATTR_POSITION,
+    DOMAIN as COVER_DOMAIN,
+    CoverEntityFeature,
+)
+from homeassistant.components.light import (
+    ATTR_BRIGHTNESS_PCT,
+    ATTR_HS_COLOR,
+    DOMAIN as LIGHT_DOMAIN,
+)
 from homeassistant.components.media_player import (
     ATTR_INPUT_SOURCE,
     ATTR_MEDIA_VOLUME_LEVEL,
     ATTR_MEDIA_VOLUME_MUTED,
     DOMAIN as MEDIA_PLAYER_DOMAIN,
 )
-
-from homeassistant.components.remote import ( SERVICE_SEND_COMMAND, DOMAIN as REMOTE_DOMAIN )
-
-from homeassistant.auth.providers.homeassistant import HassAuthProvider, InvalidAuth
-
-from homeassistant.auth.providers.trusted_networks import TrustedNetworksAuthProvider
-
-from homeassistant.auth import InvalidAuthError
-
+from homeassistant.components.remote import (
+    DOMAIN as REMOTE_DOMAIN,
+    SERVICE_SEND_COMMAND,
+)
 from homeassistant.const import (
+    ATTR_CODE,
     ATTR_ENTITY_ID,
     ATTR_SERVICE,
     ATTR_SUPPORTED_FEATURES,
-    ATTR_CODE,
-    STATE_PLAYING,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_TRIGGERED,
     SERVICE_CLOSE_COVER,
     SERVICE_OPEN_COVER,
-    SERVICE_STOP_COVER,
     SERVICE_SET_COVER_POSITION,
-    SERVICE_TURN_ON,
-    SERVICE_VOLUME_SET,
-    SERVICE_VOLUME_MUTE,
+    SERVICE_STOP_COVER,
     SERVICE_TURN_OFF,
+    SERVICE_TURN_ON,
+    SERVICE_VOLUME_MUTE,
+    SERVICE_VOLUME_SET,
+    STATE_ALARM_ARMED_AWAY,
+    STATE_ALARM_ARMED_HOME,
+    STATE_ALARM_TRIGGERED,
+    STATE_PLAYING,
 )
+from homeassistant.core import CALLBACK_TYPE, Context, callback
+from homeassistant.helpers import area_registry as ar, device_registry as dr
+from homeassistant.helpers.event import (
+    EventStateChangedData,
+    async_track_state_change_event,
+)
+from homeassistant.helpers.typing import EventType
 
 REMOTE_MAPPING = { "BACK" : "Cursor/Back",
                 "CURSOR_LEFT" : "Cursor/Left",
@@ -96,11 +83,13 @@ REMOTE_MAPPING = { "BACK" : "Cursor/Back",
                 "WIND" : "Stream/Forward"
                 }
 
+_LOGGER = logging.getLogger(__name__)
+
 class HIPRessource:
-    """Representation of af HIP Ressource"""
+    """Representation of af HIP Ressource."""
 
     def __init__(self, domain, entity, entity_name, area_name, features) -> None:
-        """Init HIPRessource"""
+        """Init HIPRessource."""
         self.domain = domain
         self.entity = entity
         self.entity_id = entity.entity_id
@@ -133,8 +122,8 @@ class HIPRessource:
         self.state_path = self.path + "STATE_UPDATE?"
 
     def state_updates(self, state, attributes : dict) -> list:
-        """Generate state update"""
-        states = list()
+        """Generate state update."""
+        states = []
         if self.domain == COVER_DOMAIN:
             if self.features & CoverEntityFeature.SET_POSITION:
                 states.append(
@@ -159,17 +148,21 @@ class HIPRessource:
             else:
                 states.append(self.state_path + "LEVEL=0")
             if ATTR_HS_COLOR in attributes:
-                states[0] = (
-                    states[0]
-                    + "&COLOR=hsv("
-                    + str(round(attributes[ATTR_HS_COLOR][0]))
-                    + ","
-                    + str(round(attributes[ATTR_HS_COLOR][1]))
-                    + ","
-                    #+ str(attributes[ATTR_BRIGHTNESS_PCT])
-                    + "100"
-                    + ")"
-                )
+                try:
+                    states[0] = (
+                        states[0]
+                        + "&COLOR=hsv("
+                        + str(round(attributes[ATTR_HS_COLOR][0]))
+                        + ","
+                        + str(round(attributes[ATTR_HS_COLOR][1]))
+                        + ","
+                        #+ str(attributes[ATTR_BRIGHTNESS_PCT])
+                        + "100"
+                        + ")"
+                    )
+                except TypeError:
+                    error_text = f"Problems handling color for state: {state.name} - HS Color Attributes: {attributes[ATTR_HS_COLOR]}"
+                    _LOGGER.Exception( error_text)
         elif self.domain == ALARM_DOMAIN:
             if state.state == STATE_ALARM_ARMED_HOME:
                 states.append(self.state_path + "ALARM=0&READY=1&MODE=ARM")
@@ -198,22 +191,22 @@ class HIPRessource:
 
 
 class HIPServer(asyncio.Protocol):
-    """Server handling the HIP protocol"""
+    """Server handling the HIP protocol."""
 
     state = "awaiting user"
 
     def __init__(self, hass: core.HomeAssistant) -> None:
-        """Init HIPServer"""
+        """Init HIPServer."""
         self.hass = hass
         self.providers = self.hass.auth.auth_providers
         self.user = ""
         self.transport = None
         self._subscriptions: list[CALLBACK_TYPE] = []
-        self.hip_ressources_by_entity_id = dict()
-        self.hip_ressources_by_entity_name = dict()
+        self.hip_ressources_by_entity_id = {}
+        self.hip_ressources_by_entity_name = {}
 
     def handle_resource_state_data(self, entity_id, state, data):
-        """Handle states data to HIP events"""
+        """Handle states data to HIP events."""
         state_updates = self.hip_ressources_by_entity_id[entity_id].state_updates(
             state, data
         )
@@ -224,24 +217,24 @@ class HIPServer(asyncio.Protocol):
     def _async_update_event_state_callback(
         self, event: EventType[EventStateChangedData]
     ) -> None:
-        """Receives event changes from HA"""
+        """Receives event changes from HA."""
         new_state = event.data["new_state"]
         self.handle_resource_state_data(
             event.data["entity_id"], new_state, new_state.attributes
         )
 
     def connection_made(self, transport):
-        """New client connnection"""
+        """Client connnected."""
         self.transport = transport
         self.send(b"login: ")
 
     def connection_lost(self, exc):
-        """Unsubscribe listeners when clients disconnects"""
+        """Unsubscribe listeners when clients disconnects."""
         while len(self._subscriptions) > 0:
             self._subscriptions.pop()()
 
     async def check_login(self, username, password):
-        """Checks ip / credentials against Home Assistant"""
+        """Check ip / credentials against Home Assistant."""
         for provider in self.providers:
             if isinstance (provider, TrustedNetworksAuthProvider):
                 ip = ipaddress.ip_address(self.transport.get_extra_info('peername')[0])
@@ -263,7 +256,7 @@ class HIPServer(asyncio.Protocol):
         return False
 
     def data_received(self, data):
-        """Data received from BeoLiving app"""
+        """Received data from BeoLiving app."""
         if self.state == "awaiting user":
             self.user = data.decode()
             self.state = "awaiting password"
@@ -274,10 +267,9 @@ class HIPServer(asyncio.Protocol):
         else:
             lines = data.decode().splitlines()
             for line in lines:
-                print(line)
                 if line == "f":
                     self.send_ok_line("f")
-                if line == "q */*/*/*" or line == "q":
+                if line in ("q */*/*/*", "q"):
                     self.send_ok_line("q */*/*/*")
                     states = self.hass.states.async_all()
 
@@ -441,7 +433,7 @@ class HIPServer(asyncio.Protocol):
                             if(parameters["Command"][0] == "Mute"):
                                 service = SERVICE_VOLUME_MUTE
                                 params[ATTR_MEDIA_VOLUME_MUTED] = not entity.is_volume_muted
-                        if service != None:
+                        if service is not None:
                             self.async_call_service(
                                 hip_ressource.entity_id,
                                 hip_ressource.entity_name,
@@ -463,27 +455,27 @@ class HIPServer(asyncio.Protocol):
                     self.send_ok_line("c ")
 
     def send(self, data):
-        """Low level send method"""
+        """Low level send method."""
         self.transport.write(data)
 
     def send_ok_line(self, string: str):
-        """Send OK response"""
+        """Send OK response."""
         self.send(
             ("e OK " + self.percent_encoding(string) + "\r\n").encode(encoding="ascii")
         )
 
     def send_response_line(self, string: str):
-        """Send state response"""
+        """Send state response."""
         self.send(
             ("r " + self.percent_encoding(string) + "\r\n").encode(encoding="ascii")
         )
 
     def send_state_line(self, string: str):
-        """Send state update"""
+        """Send state update."""
         self.send(("s " + string + "\r\n").encode(encoding="ascii"))
 
     def percent_encoding(self, string: str):
-        """Handles percent encoding"""
+        """Handle percent encoding."""
         result = ""
         accepted = [
             c
@@ -506,7 +498,7 @@ class HIPServer(asyncio.Protocol):
         service_data: dict[str, Any] | None,
         value: Any | None = None,
     ) -> None:
-        """Fire event and call service for changes from Be."""
+        """Fire event and call service for changes from BeoLink App."""
         event_data = {
             ATTR_ENTITY_ID: entity_id,
             display_name: display_name,
