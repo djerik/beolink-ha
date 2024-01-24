@@ -1,7 +1,7 @@
 """Module for handling the tcp communication."""
-import logging
 import asyncio
 import ipaddress
+import logging
 from typing import Any
 from urllib.parse import parse_qs, quote, unquote
 
@@ -67,6 +67,8 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.helpers.typing import EventType
 
+from .const import MODE_EXCLUDE, MODE_INCLUDE
+
 REMOTE_MAPPING = { "BACK" : "Cursor/Back",
                 "CURSOR_LEFT" : "Cursor/Left",
                 "CURSOR_RIGHT" : "Cursor/Right",
@@ -110,15 +112,7 @@ class HIPRessource:
             if entity.platform.platform_name == "beoplay":
                 self.product_id = entity._type_number + "."+ entity._item_number+ "." + entity._serial_number + "@products.bang-olufsen.com"
 
-        self.path = quote(
-            "House/"
-            + self.area_name
-            + "/"
-            + self.hip_type
-            + "/"
-            + self.entity_name
-            + "/"
-        )
+        self.path = "House/" + quote(self.area_name, safe='') + "/" + quote(self.hip_type,  safe='') + "/" + quote(self.entity_name, safe='') + "/"
         self.state_path = self.path + "STATE_UPDATE?"
 
     def state_updates(self, state, attributes : dict) -> list:
@@ -195,12 +189,17 @@ class HIPServer(asyncio.Protocol):
 
     state = "awaiting user"
 
-    def __init__(self, hass: core.HomeAssistant) -> None:
+    def __init__(self, include_entities : str, exclude_entities : str, include_exclude_mode : str, hass: core.HomeAssistant) -> None:
         """Init HIPServer."""
+
+        self.include_entities = include_entities
+        self.exclude_entities = exclude_entities
+        self.include_exclude_mode = include_exclude_mode
         self.hass = hass
         self.providers = self.hass.auth.auth_providers
         self.user = ""
         self.transport = None
+        self.buffer = ""
         self._subscriptions: list[CALLBACK_TYPE] = []
         self.hip_ressources_by_entity_id = {}
         self.hip_ressources_by_entity_name = {}
@@ -257,16 +256,22 @@ class HIPServer(asyncio.Protocol):
 
     def data_received(self, data):
         """Received data from BeoLiving app."""
-        if self.state == "awaiting user":
-            self.user = data.decode()
-            self.state = "awaiting password"
-            self.send(b"\r\npassword: ")
-        elif self.state == "awaiting password":
-            password = data.decode().splitlines()[0]
-            self.hass.loop.create_task(self.check_login(self.user, password))
-        else:
-            lines = data.decode().splitlines()
-            for line in lines:
+        self.buffer += data.decode()
+        lines = self.buffer.splitlines(True)
+        for line in lines:
+            if not line.endswith("\r\n"):
+                self.buffer = line
+                continue
+            self.buffer = self.buffer.removeprefix(line)
+            _LOGGER.debug("Received: %s", line)
+            line = line.removesuffix("\r\n")
+            if self.state == "awaiting user":
+                self.user = line
+                self.state = "awaiting password"
+                self.send(b"\r\npassword: ")
+            elif self.state == "awaiting password":
+                self.hass.loop.create_task(self.check_login(self.user, line))
+            else:
                 if line == "f":
                     self.send_ok_line("f")
                 if line in ("q */*/*/*", "q"):
@@ -283,6 +288,14 @@ class HIPServer(asyncio.Protocol):
                             ALARM_DOMAIN,
                             MEDIA_PLAYER_DOMAIN,
                         }:
+                            if( self.include_exclude_mode == MODE_INCLUDE and state.entity_id not in self.include_entities ):
+                                continue
+                            if( self.include_exclude_mode == MODE_EXCLUDE and state.entity_id in self.exclude_entities ):
+                                continue
+                            if "?" in state.name or "/" in state.name:
+                                message = f"Entity {state.name} contains illegal character (? or /) for BeoLink usage"
+                                _LOGGER.info( message )
+                                continue
                             domain = self.hass.data.get(state.domain)
                             if( domain is None):
                                 continue
@@ -333,7 +346,7 @@ class HIPServer(asyncio.Protocol):
                     self.send_response_line(
                         "Main/global/SYSTEM/BLGW/STATE_UPDATE?CURRENT%20FIRMWARE=1.5.4.557&LATEST%20FIRMWARE=&ROLLBACK%20AVAILABLE=1.5.4.533_2023.01.31-22.01.55&SYSTEM%20INFO=READY&revision=39"
                     )
-                elif str(line).startswith("c "):
+                elif line.startswith("c "):
                     command = unquote(line).split("/")
                     action = command[4]
                     entity_name = command[3]
@@ -460,34 +473,19 @@ class HIPServer(asyncio.Protocol):
 
     def send_ok_line(self, string: str):
         """Send OK response."""
-        self.send(
-            ("e OK " + self.percent_encoding(string) + "\r\n").encode(encoding="ascii")
-        )
+        _LOGGER.debug("Sending OK: %s", string)
+        self.send(("e OK " + quote(string) + "\r\n").encode(encoding="ascii"))
 
     def send_response_line(self, string: str):
         """Send state response."""
-        self.send(
-            ("r " + self.percent_encoding(string) + "\r\n").encode(encoding="ascii")
+        _LOGGER.debug("Sending Response: %s", string)
+        self.send(("r " + quote(string) + "\r\n").encode(encoding="ascii")
         )
 
     def send_state_line(self, string: str):
         """Send state update."""
+        _LOGGER.debug("Sending State: %s", string)
         self.send(("s " + string + "\r\n").encode(encoding="ascii"))
-
-    def percent_encoding(self, string: str):
-        """Handle percent encoding."""
-        result = ""
-        accepted = [
-            c
-            for c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~/?=&".encode(
-                encoding="ascii"
-            )
-        ]
-        for char in string.encode(encoding="ascii"):
-            result += (
-                chr(char) if char in accepted else "%{}".format(hex(char)[2:]).upper()
-            )
-        return result
 
     def async_call_service(
         self,

@@ -7,6 +7,7 @@ from aiohttp import MultipartWriter, web
 from aiohttp_basicauth import BasicAuthMiddleware
 import jsonpickle
 
+from config.custom_components.beolink.const import MODE_EXCLUDE, MODE_INCLUDE
 from homeassistant import core
 from homeassistant.auth import InvalidAuthError
 from homeassistant.auth.providers.homeassistant import (
@@ -58,11 +59,14 @@ class CustomBasicAuth(BasicAuthMiddleware):
 class BLGWServer:
     """Handles BLGW HTTP requests."""
 
-    def __init__(self, name, serial_number, hass: core.HomeAssistant) -> None:
+    def __init__(self, name : str, serial_number : str, include_entities, exclude_entities, include_exclude_mode : str,  hass: core.HomeAssistant) -> None:
         """Init BLGWServer."""
-        self.hass = hass
         self.name = name
         self.serial_number = serial_number
+        self.include_entities = include_entities
+        self.exclude_entities = exclude_entities
+        self.include_exclude_mode = include_exclude_mode
+        self.hass = hass
 
     async def camera_mjpeg(self, request):
         """Handle a mjpeg stream."""
@@ -108,14 +112,22 @@ class BLGWServer:
                 ALARM_DOMAIN,
                 MEDIA_PLAYER_DOMAIN,
             }:
+                if( self.include_exclude_mode == MODE_INCLUDE and state.entity_id not in self.include_entities ):
+                    continue
+                if( self.include_exclude_mode == MODE_EXCLUDE and state.entity_id in self.exclude_entities ):
+                    continue
                 domain = self.hass.data.get(state.domain)
                 if( domain is None):
                     continue
                 entity = domain.get_entity(state.entity_id)
                 if entity is None or entity.registry_entry is None:
                     continue
-                if entity.device_info is None or "Name" not in entity.device_info:
-                    message = f"Entity {entity.entity_id} has no device_info or no entity name"
+                if state.name is None:
+                    message = f"Entity {entity.entity_id} has no entity name"
+                    _LOGGER.info( message )
+                    continue
+                if "?" in state.name or "/" in state.name:
+                    message = f"Entity {state.name} contains illegal character (? or /) for BeoLink usage"
                     _LOGGER.info( message )
                     continue
                 area_id = entity.registry_entry.area_id
@@ -143,7 +155,7 @@ class BLGWServer:
                         states.append("LEVEL")
                     shade = {
                         "type": "SHADE",
-                        "name": state.attributes["friendly_name"],
+                        "name": state.name,
                         "id": entity.entity_id,
                         "systemAddress": "HomeAssistant",
                         "hide": False,
@@ -155,7 +167,7 @@ class BLGWServer:
                 if state.domain == LIGHT_DOMAIN:
                     dimmer = {
                         "type": "DIMMER",
-                        "name": state.attributes["friendly_name"],
+                        "name": state.name,
                         "id": entity.entity_id,
                         "systemAddress": "HomeAssistant",
                         "hide": False,
@@ -169,7 +181,7 @@ class BLGWServer:
                 if state.domain == CAMERA_DOMAIN:
                     camera = {
                         "type": "CAMERA",
-                        "name": state.attributes["friendly_name"],
+                        "name": state.name,
                         "rtspSupport": False,
                         "commands": [],
                     }
@@ -177,7 +189,7 @@ class BLGWServer:
                 if state.domain == "climate":
                     thermostate = {
                         "type": "THERMOSTAT_1SP",
-                        "name": entity.device_info["name"],
+                        "name": state.name,
                         "id": entity.entity_id,
                         "systemAddress": "HomeAssistant",
                         "hide": False,
@@ -195,7 +207,7 @@ class BLGWServer:
                 if state.domain == ALARM_DOMAIN:
                     alarm = {
                         "type": "ALARM",
-                        "name": entity.device_info["name"],
+                        "name": state.name,
                         "id": entity.entity_id,
                         "systemAddress": "HomeAssistant",
                         "hide": False,
@@ -232,7 +244,7 @@ class BLGWServer:
                             _LOGGER.exception(error_text)
                     media_player = {
                         "type": "AV renderer",
-                        "name": state.attributes["friendly_name"],
+                        "name": state.name,
                         "id": entity.entity_id,
                         "systemAddress": "HomeAssistant",
                         "hide": False,

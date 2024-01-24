@@ -1,45 +1,45 @@
-"""Module for casting objects"""
-from typing import cast
-import time
-
+"""Module for casting objects."""
 import asyncio
-
 import socket
+import time
+from typing import cast
 
+from aiohttp import web
 from zeroconf.asyncio import ServiceInfo
 
 from homeassistant import config_entries, core
-
-from homeassistant.components import zeroconf
-
-from homeassistant.helpers import instance_id
-
 from homeassistant.auth.providers.homeassistant import HassAuthProvider
+from homeassistant.components import zeroconf
+from homeassistant.const import CONF_NAME, CONF_PORT
+from homeassistant.helpers import instance_id
+from homeassistant.helpers.entityfilter import (
+    CONF_EXCLUDE_ENTITIES,
+    CONF_INCLUDE_ENTITIES,
+)
 
+from .blgwserver import BLGWServer, CustomBasicAuth
+from .const import CONF_INCLUDE_EXCLUDE_MODE, CONF_SERIAL_NUMBER, DOMAIN
 from .hipserver import HIPServer
 
-from .blgwserver import CustomBasicAuth, BLGWServer
-
-from .const import DOMAIN, CONF_BEOLINK_NAME, CONF_SERIAL_NUMBER, CONF_BLGW_SERVER_PORT
-
-from aiohttp import web
 
 async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
     """Set up BeoLink from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
     loop = asyncio.get_running_loop()
-    server = await loop.create_server(lambda: HIPServer(hass), None, 9100)
+    hipserver = await loop.create_server(lambda: HIPServer(entry.options[CONF_INCLUDE_ENTITIES],entry.options[CONF_EXCLUDE_ENTITIES],entry.options[CONF_INCLUDE_EXCLUDE_MODE],hass), None, 9100)
 
     providers = hass.auth.auth_providers
     auth = CustomBasicAuth(cast(HassAuthProvider, providers))
-    server = BLGWServer(entry.data[CONF_BEOLINK_NAME],entry.data[CONF_SERIAL_NUMBER],hass)
+    server = BLGWServer(entry.options[CONF_NAME],entry.options[CONF_SERIAL_NUMBER],entry.options[CONF_INCLUDE_ENTITIES],entry.options[CONF_EXCLUDE_ENTITIES],entry.options[CONF_INCLUDE_EXCLUDE_MODE], hass)
     app = web.Application(middlewares=[auth])
     app.router.add_routes( [web.get('/blgwpservices.json', server.blgwpservices),web.get('/a/view/House/{zone}/CAMERA/{camera_name}/mjpeg', server.camera_mjpeg)] )
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite( runner, None, entry.data.get( CONF_BLGW_SERVER_PORT, 80))
+    site = web.TCPSite( runner, None, entry.data.get( CONF_PORT, 80))
     await site.start()
+
+    hass.data[DOMAIN][entry.entry_id] = {'BLGWServer' : site, 'HIPServer' : hipserver}
 
     zeroconf_instance = await zeroconf.async_get_instance(hass)
 
@@ -48,9 +48,9 @@ async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.Con
     desc = {
         "hipport": "9100",
         "path": "/blgwpservices.json",
-        "project": entry.data[CONF_BEOLINK_NAME],
+        "project": entry.options[CONF_NAME],
         "protover": "2",
-        "sn": entry.data[CONF_SERIAL_NUMBER],
+        "sn": entry.options[CONF_SERIAL_NUMBER],
         "swver": "1.5.4.557",
         "timestamp": int(time.time()),
     }
@@ -59,7 +59,7 @@ async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.Con
 
     info = ServiceInfo(
         "_hipservices._tcp.local.",
-        "BLGW (blgw) | "+entry.data[CONF_BEOLINK_NAME]+"._hipservices._tcp.local.",
+        "BLGW (blgw) | "+entry.options[CONF_NAME]+"._hipservices._tcp.local.",
         addresses=[socket.inet_aton(local_address)],
         port=80,
         properties=desc,
@@ -76,9 +76,17 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
     # @TODO: Add setup code.
     return True
 
+
+async def async_unload_entry(hass: core.HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
+    """Unload a config entry."""
+    site : web.TCPSite = hass.data[DOMAIN][entry.entry_id]['BLGWServer']
+    await site.stop()
+    hipserver : HIPServer = hass.data[DOMAIN][entry.entry_id]['HIPServer']
+    hipserver.close()
+    return True
+
 def get_local_address() -> str:
-    """
-    Grabs the local IP address using a socket.
+    """Grabs the local IP address using a socket.
 
     :return: Local IP Address in IPv4 format.
     :rtype: str

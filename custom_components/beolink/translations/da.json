@@ -14,11 +14,27 @@
     "step": {
       "init": {
         "data": {
-          "beolink_name" : "BeoLink Name",
-          "blgw_server_port" : "BeoLink Gateway Server Port"
+          "beolink_name" : "BeoLink Navn",
+          "blgw_server_port" : "BeoLink Gateway Server Port",
+          "include_exclude_mode" : "Inkluderings Mode",
+          "domains" : "Domæner der skal indkluderes"
         },
-        "description": "Indtast BeoLink informationer",
-        "title": "Konfiguration"
+        "include": {
+          "data": {
+            "entities" : "Entiteter"
+          },
+          "description": "Vælg entiteter fra domænerne “{domains}”. Kun de inkludere entiteter vil være i BeoLink app",
+          "title": "Vælg entiteter der skal inkluderes"
+        },
+        "exclude": {
+          "data": {
+            "entities" : "Entiteter"
+          },
+          "description": "Vælge entiteter der fra domænerne “{domains}”. Kun de ekskludere entiteter vil være holdt væk fra BeoLink app",
+          "title": "Vælg entiteter der skal ekskluderes"
+        },
+        "description": "Indtast BeoLink navn og port. Du kan vælge hvilke entiteter der skal inkluderes eller ekskluderes på den næste skærm",
+        "title": "Vælg navn, port, mode og domæner"
       }
     }
   }

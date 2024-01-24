@@ -14,11 +14,27 @@
     "step": {
       "init": {
         "data": {
-          "beolink_name" : "BeoLink Name",
-          "blgw_server_port" : "BeoLink Gateway Server Port"
+          "name" : "BeoLink Name",
+          "port" : "BeoLink Gateway Server Port",
+          "include_exclude_mode" : "Inclusion Mode",
+          "domains" : "Domains to include"
         },
-        "description": "Enter your BeoLink information",
-        "title": "Configuration"
+        "description": "Enter your BeoLink name and port. Entities in the “Domains to include” will be included in BeoLiving. You will be able to select which entities to include or exclude from this list on the next screen.",
+        "title": "Select mode and domains."
+      },
+      "include": {
+        "data": {
+          "entities" : "Entities"
+        },
+        "description": "Select entities from each domain in “{domains}”. The include will cover the entire domain if you do not select any entities for a given domain",
+        "title": "Select the entities to be include"
+      },
+      "exclude": {
+        "data": {
+          "entities" : "Entities"
+        },
+        "description": "Select entities from each domain in “{domains}”. The exclude will cover the entire domain if you do not select any entities for a given domain",
+        "title": "Select the entities to exclude."
       }
     }
   }

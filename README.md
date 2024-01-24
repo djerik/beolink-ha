@@ -7,25 +7,28 @@
 ## Installation
 Files are installed by downloading the files to your custom_components folder directly from here or by adding it via HACS.
 
-Afterwards you can go to the Integrations sections and click the add integration button. Search for BeoLink and choose the newly added BeoLink integration.
+Afterwards you must go to the Integrations sections and click the add integration button. Search for BeoLink and choose the newly added BeoLink integration.
 
 You will be asked to name your BeoLink Bridge. This is the name you will see in the app.
 
-It will automatically lookup all supported entities and expose them to BeoLink app use. An entity or device must be added to an Area in order to show up in the Beoliving app. ZereConf might not be working in your network configuration, in wich case you will need to add the BeoLink Bridge to the app manually, by entering the IP of your Home Assistant installation in the App under Settings -> "+"
+Next you must go the settings of BeoLink and configure what entities to show in the BeoLink app. An entity or device must be added to an Area in order to show up in the Beoliving app. ZereConf might not be working in your network configuration, in which case you will need to add the BeoLink Bridge to the app manually, by entering the IP of your Home Assistant installation in the App under Settings -> "+"
 
-You login using your Home Assistant user name and password.
+You login using your Home Assistant user name and password. If you are using Trusted Network, any user name and password can be entered.
 
 ## Changelog
 - 2023-07-23 Initial Version
 - 2023-10-14 Major Release adding support for BeoPlay devices via the BeoPlay components. Added support for native HA Thermostats & Alarm
 - 2023-12-03 Added support for TrustedNetworksAuthProvider
 - 2023-12-23 Improved handling of None object references
+- 2024-01-25 Major overhaul of code
 
 ## Known limitations
 - Only BeoPlay devices are supported via the BeoPlay component https://github.com/giachello/beoplay
 - Display of surveilance cameras on B&O TVs not yet implemented
 - RTSP streaming of cameras not implemented. MJPEG is working as fallback solution
 - Scenes are under implementation
+- Entities cannot have ? or / in the name
+- Entities with same name can cause problems
 
 ![image](https://github.com/djerik/beolink-ha/assets/1743422/cea1269c-f24a-42bf-823b-cba93f7d0b2f)
 

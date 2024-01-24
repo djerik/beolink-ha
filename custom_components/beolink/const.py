@@ -1,5 +1,7 @@
 DOMAIN = "beolink"
 
-CONF_BEOLINK_NAME = "beolink_name"
 CONF_SERIAL_NUMBER = "serial_number"
-CONF_BLGW_SERVER_PORT = "blgw_server_port"
+CONF_INCLUDE_EXCLUDE_MODE = "include_exclude_mode"
+
+MODE_INCLUDE = "include"
+MODE_EXCLUDE = "exclude"
