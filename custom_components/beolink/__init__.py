@@ -36,7 +36,7 @@ async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.Con
     app.router.add_routes( [web.get('/blgwpservices.json', server.blgwpservices),web.get('/a/view/House/{zone}/CAMERA/{camera_name}/mjpeg', server.camera_mjpeg)] )
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite( runner, None, entry.data.get( CONF_PORT, 80))
+    site = web.TCPSite( runner, None, entry.options.get( CONF_PORT, 80))
     await site.start()
 
     hass.data[DOMAIN][entry.entry_id] = {'BLGWServer' : site, 'HIPServer' : hipserver}
