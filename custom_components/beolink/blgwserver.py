@@ -7,7 +7,7 @@ from aiohttp import MultipartWriter, web
 from aiohttp_basicauth import BasicAuthMiddleware
 import jsonpickle
 
-from config.custom_components.beolink.const import MODE_EXCLUDE, MODE_INCLUDE
+from .const import MODE_EXCLUDE, MODE_INCLUDE
 from homeassistant import core
 from homeassistant.auth import InvalidAuthError
 from homeassistant.auth.providers.homeassistant import (

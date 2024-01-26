@@ -21,6 +21,7 @@ You login using your Home Assistant user name and password. If you are using Tru
 - 2023-12-03 Added support for TrustedNetworksAuthProvider
 - 2023-12-23 Improved handling of None object references
 - 2024-01-25 Major overhaul of code
+- 2024-01-26 Fixed import path blocking config flow
 
 ## Known limitations
 - Only BeoPlay devices are supported via the BeoPlay component https://github.com/giachello/beoplay
