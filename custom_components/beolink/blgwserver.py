@@ -1,5 +1,4 @@
 """Module for returning data formatted in json."""
-import ipaddress
 import json
 import logging
 
@@ -7,24 +6,26 @@ from aiohttp import MultipartWriter, web
 from aiohttp_basicauth import BasicAuthMiddleware
 import jsonpickle
 
-from .const import MODE_EXCLUDE, MODE_INCLUDE
 from homeassistant import core
-from homeassistant.auth import InvalidAuthError
 from homeassistant.auth.providers.homeassistant import (
     AuthProvider,
     HassAuthProvider,
     InvalidAuth,
 )
-from homeassistant.auth.providers.trusted_networks import TrustedNetworksAuthProvider
 from homeassistant.components.alarm_control_panel import DOMAIN as ALARM_DOMAIN
 from homeassistant.components.camera import DOMAIN as CAMERA_DOMAIN
 from homeassistant.components.climate import DOMAIN as CLIMATE_DOMAIN
 from homeassistant.components.cover import DOMAIN as COVER_DOMAIN, CoverEntityFeature
-from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
+from homeassistant.components.light import (
+    ATTR_SUPPORTED_COLOR_MODES,
+    DOMAIN as LIGHT_DOMAIN,
+    color_supported,
+)
 from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_DOMAIN
 from homeassistant.const import ATTR_SUPPORTED_FEATURES
 from homeassistant.helpers import area_registry as ar, device_registry as dr
 
+from .const import MODE_EXCLUDE, MODE_INCLUDE
 from .model.blgwpwebservices import Area, Zone, blgwpwebservices
 
 _LOGGER = logging.getLogger(__name__)
@@ -40,14 +41,7 @@ class CustomBasicAuth(BasicAuthMiddleware):
     async def check_credentials(self, username, password, request):
         """Check ip / credentials against Home Assistant."""
         for provider in self.providers:
-            if isinstance (provider, TrustedNetworksAuthProvider):
-                ip = ipaddress.ip_address(request.remote)
-                try:
-                    provider.async_validate_access(ip)
-                except InvalidAuthError:
-                    return False
-                return True
-            elif isinstance (provider, HassAuthProvider):
+            if isinstance (provider, HassAuthProvider):
                 try:
                     await provider.async_validate_login(username, password)
                 except InvalidAuth:
@@ -174,7 +168,8 @@ class BLGWServer:
                         "commands": ["SET"],
                         "states": ["LEVEL"],
                     }
-                    if( entity.supported_color_modes is not None ):
+                    color_modes = (state.attributes.get(ATTR_SUPPORTED_COLOR_MODES) or [])
+                    if( color_supported(color_modes) ):
                         dimmer['commands'].append("SET COLOR")
                         dimmer['states'].append("COLOR")
                     bl_ressources[area_id][state.entity_id] = dimmer

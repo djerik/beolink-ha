@@ -1,14 +1,11 @@
 """Module for handling the tcp communication."""
 import asyncio
-import ipaddress
 import logging
 from typing import Any
 from urllib.parse import parse_qs, quote, unquote
 
 from homeassistant import core
-from homeassistant.auth import InvalidAuthError
 from homeassistant.auth.providers.homeassistant import HassAuthProvider, InvalidAuth
-from homeassistant.auth.providers.trusted_networks import TrustedNetworksAuthProvider
 from homeassistant.components.alarm_control_panel import (
     DOMAIN as ALARM_DOMAIN,
     SERVICE_ALARM_ARM_AWAY,
@@ -27,9 +24,16 @@ from homeassistant.components.cover import (
     CoverEntityFeature,
 )
 from homeassistant.components.light import (
+    ATTR_BRIGHTNESS,
     ATTR_BRIGHTNESS_PCT,
+    ATTR_COLOR_MODE,
+    ATTR_COLOR_TEMP_KELVIN,
     ATTR_HS_COLOR,
+    ATTR_SUPPORTED_COLOR_MODES,
     DOMAIN as LIGHT_DOMAIN,
+    ColorMode,
+    brightness_supported,
+    color_supported,
 )
 from homeassistant.components.media_player import (
     ATTR_INPUT_SOURCE,
@@ -66,6 +70,7 @@ from homeassistant.helpers.event import (
     async_track_state_change_event,
 )
 from homeassistant.helpers.typing import EventType
+from homeassistant.util.color import color_temperature_to_hs
 
 from .const import MODE_EXCLUDE, MODE_INCLUDE
 
@@ -135,28 +140,40 @@ class HIPRessource:
             states.append(self.state_path + "MODE=Auto")
             states.append(self.state_path + "FAN AUTO=true")
         elif self.domain == LIGHT_DOMAIN:
-            if ATTR_BRIGHTNESS_PCT in attributes:
-                states.append(
-                    self.state_path + "LEVEL=" + str(attributes[ATTR_BRIGHTNESS_PCT])
-                )
-            else:
-                states.append(self.state_path + "LEVEL=0")
-            if ATTR_HS_COLOR in attributes:
-                try:
-                    states[0] = (
-                        states[0]
-                        + "&COLOR=hsv("
-                        + str(round(attributes[ATTR_HS_COLOR][0]))
-                        + ","
-                        + str(round(attributes[ATTR_HS_COLOR][1]))
-                        + ","
-                        #+ str(attributes[ATTR_BRIGHTNESS_PCT])
-                        + "100"
-                        + ")"
-                    )
-                except TypeError:
-                    error_text = f"Problems handling color for state: {state.name} - HS Color Attributes: {attributes[ATTR_HS_COLOR]}"
-                    _LOGGER.Exception( error_text)
+            try:
+                color_modes = (state.attributes.get(ATTR_SUPPORTED_COLOR_MODES) or [])
+
+                if( brightness_supported(color_modes)
+                    and (brightness := attributes.get(ATTR_BRIGHTNESS)) is not None
+                    and isinstance(brightness, (int, float))):
+                    states.append( self.state_path + "LEVEL=" + str(round(brightness / 255 * 100, 0) ) )
+                color_modes = (attributes.get(ATTR_SUPPORTED_COLOR_MODES) or [] )
+
+                if color_supported(color_modes):
+                    color_mode = attributes.get(ATTR_COLOR_MODE)
+                    if color_temp := attributes.get(ATTR_COLOR_TEMP_KELVIN):
+                        hue, saturation = color_temperature_to_hs(color_temp)
+                    elif color_mode == ColorMode.WHITE:
+                        hue, saturation = 0, 0
+                    elif hue_sat := attributes.get(ATTR_HS_COLOR):
+                        hue, saturation = hue_sat
+                    else:
+                        hue = None
+                        saturation = None
+                    if isinstance(hue, (int, float)) and isinstance(saturation, (int, float)):
+                        states[0] = (
+                            states[0]
+                            + "&COLOR=hsv("
+                            + str(hue)
+                            + ","
+                            + str(saturation)
+                            + ","
+                            + str(round(brightness / 255 * 100, 0) )
+                            + ")"
+                        )
+            except Exception:
+                    error_text = f"Problems handling color for state: {state.name}"
+                    _LOGGER.exception( error_text)
         elif self.domain == ALARM_DOMAIN:
             if state.state == STATE_ALARM_ARMED_HOME:
                 states.append(self.state_path + "ALARM=0&READY=1&MODE=ARM")
@@ -235,16 +252,7 @@ class HIPServer(asyncio.Protocol):
     async def check_login(self, username, password):
         """Check ip / credentials against Home Assistant."""
         for provider in self.providers:
-            if isinstance (provider, TrustedNetworksAuthProvider):
-                ip = ipaddress.ip_address(self.transport.get_extra_info('peername')[0])
-                try:
-                    provider.async_validate_access(ip)
-                except InvalidAuthError:
-                    return False
-                self.state = "authenticated"
-                self.send(b"\r\n")
-                return True
-            elif isinstance (provider, HassAuthProvider):
+            if isinstance (provider, HassAuthProvider):
                 try:
                     await provider.async_validate_login(username, password)
                 except InvalidAuth:
