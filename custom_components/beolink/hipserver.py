@@ -282,6 +282,10 @@ class HIPServer(asyncio.Protocol):
             else:
                 if line == "f":
                     self.send_ok_line("f")
+                if line == "q */*/SYSTEM/*":
+                    self.send_response_line(
+                        "Main/global/SYSTEM/BLGW/STATE_UPDATE?CURRENT%20FIRMWARE=1.5.4.557&LATEST%20FIRMWARE=&ROLLBACK%20AVAILABLE=1.5.4.533_2023.01.31-22.01.55&SYSTEM%20INFO=READY&revision=39"
+                    )
                 if line in ("q */*/*/*", "q"):
                     self.send_ok_line("q */*/*/*")
                     states = self.hass.states.async_all()
