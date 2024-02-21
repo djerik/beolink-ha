@@ -13,7 +13,7 @@ from homeassistant.components.alarm_control_panel import (
     SERVICE_ALARM_DISARM,
 )
 from homeassistant.components.climate import (
-    ATTR_TEMPERATURE,
+    ATTR_CURRENT_TEMPERATURE,
     DOMAIN as CLIMATE_DOMAIN,
     SERVICE_SET_TEMPERATURE,
 )
@@ -50,6 +50,7 @@ from homeassistant.const import (
     ATTR_ENTITY_ID,
     ATTR_SERVICE,
     ATTR_SUPPORTED_FEATURES,
+    ATTR_TEMPERATURE,
     SERVICE_CLOSE_COVER,
     SERVICE_OPEN_COVER,
     SERVICE_SET_COVER_POSITION,
@@ -63,7 +64,7 @@ from homeassistant.const import (
     STATE_ALARM_TRIGGERED,
     STATE_PLAYING,
 )
-from homeassistant.core import CALLBACK_TYPE, Context, callback
+from homeassistant.core import CALLBACK_TYPE, Context, State, callback
 from homeassistant.helpers import area_registry as ar, device_registry as dr
 from homeassistant.helpers.event import (
     EventStateChangedData,
@@ -129,14 +130,14 @@ class HIPRessource:
                     self.state_path + "LEVEL=" + str(attributes[ATTR_CURRENT_POSITION])
                 )
         elif self.domain == CLIMATE_DOMAIN:
-            states.append(
-                self.state_path
-                + "TEMPERATURE="
-                + str(round(attributes["current_temperature_air"]))
-            )
-            states.append(
-                self.state_path + "SETPOINT=" + str(round(attributes[ATTR_TEMPERATURE]))
-            )
+
+            current_temp = _get_current_temperature(state)
+            if current_temp is not None:
+                states.append( self.state_path + "TEMPERATURE=" + str(current_temp))
+            target_temp = _get_target_temperature(state)
+            if target_temp is not None:
+                states.append( self.state_path + "SETPOINT=" + str(target_temp))
+
             states.append(self.state_path + "MODE=Auto")
             states.append(self.state_path + "FAN AUTO=true")
         elif self.domain == LIGHT_DOMAIN:
@@ -199,7 +200,6 @@ class HIPRessource:
             states.append( temp )
 
         return states
-
 
 class HIPServer(asyncio.Protocol):
     """Server handling the HIP protocol."""
@@ -407,10 +407,10 @@ class HIPServer(asyncio.Protocol):
                             params,
                         )
                     elif ressource_type == "THERMOSTAT_1SP":
-                        qs = str(action).split("?")[1]
-                        parameters = parse_qs(qs)
-                        params[ATTR_TEMPERATURE] = parameters["VALUE"][0]
-                        if parameter == "SET SETPOINT":
+                        if action.startswith("SET SETPOINT"):
+                            qs = str(action).split("?")[1]
+                            parameters = parse_qs(qs)
+                            params[ATTR_TEMPERATURE] = parameters["VALUE"][0]
                             self.async_call_service(
                                 hip_ressource.entity_id,
                                 hip_ressource.entity_name,
@@ -519,3 +519,18 @@ class HIPServer(asyncio.Protocol):
                 domain, service, service_data, context=context
             )
         )
+
+def _get_target_temperature(state: State) -> float | None:
+    """Calculate the target temperature from a state."""
+    target_temp = state.attributes.get(ATTR_TEMPERATURE)
+    if isinstance(target_temp, (int, float)):
+        return round(target_temp)
+    return None
+
+
+def _get_current_temperature(state: State) -> float | None:
+    """Calculate the current temperature from a state."""
+    current_temp = state.attributes.get(ATTR_CURRENT_TEMPERATURE)
+    if isinstance(current_temp, (int, float)):
+        return round(current_temp)
+    return None
