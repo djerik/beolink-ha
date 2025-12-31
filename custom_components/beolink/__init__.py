@@ -2,13 +2,11 @@
 import asyncio
 import socket
 import time
-from typing import cast
 
 from aiohttp import web
-from zeroconf.asyncio import ServiceInfo
+from zeroconf import ServiceInfo
 
 from homeassistant import config_entries, core
-from homeassistant.auth.providers.homeassistant import HassAuthProvider
 from homeassistant.components import zeroconf
 from homeassistant.const import CONF_NAME, CONF_PORT
 from homeassistant.helpers import instance_id
@@ -22,15 +20,14 @@ from .const import CONF_INCLUDE_EXCLUDE_MODE, CONF_SERIAL_NUMBER, DOMAIN
 from .hipserver import HIPServer
 
 
-async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
+async def async_setup_entry(hass: core.HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
     """Set up BeoLink from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
     loop = asyncio.get_running_loop()
     hipserver = await loop.create_server(lambda: HIPServer(entry.options[CONF_INCLUDE_ENTITIES],entry.options[CONF_EXCLUDE_ENTITIES],entry.options[CONF_INCLUDE_EXCLUDE_MODE],hass), None, 9100)
 
-    providers = hass.auth.auth_providers
-    auth = CustomBasicAuth(cast(HassAuthProvider, providers))
+    auth = CustomBasicAuth(hass.auth.auth_providers)
     server = BLGWServer(entry.options[CONF_NAME],entry.options[CONF_SERIAL_NUMBER],entry.options[CONF_INCLUDE_ENTITIES],entry.options[CONF_EXCLUDE_ENTITIES],entry.options[CONF_INCLUDE_EXCLUDE_MODE], hass)
     app = web.Application(middlewares=[auth])
     app.router.add_routes( [web.get('/blgwpservices.json', server.blgwpservices),web.get('/a/view/House/{zone}/CAMERA/{camera_name}/mjpeg', server.camera_mjpeg)] )
@@ -68,6 +65,9 @@ async def async_setup_entry( hass: core.HomeAssistant, entry: config_entries.Con
 
     await zeroconf_instance.async_register_service(info, allow_name_change=True)
 
+    # Store service info for cleanup
+    hass.data[DOMAIN][entry.entry_id]['zeroconf_info'] = info
+
     return True
 
 
@@ -79,10 +79,21 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
 
 async def async_unload_entry(hass: core.HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
     """Unload a config entry."""
-    site : web.TCPSite = hass.data[DOMAIN][entry.entry_id]['BLGWServer']
+    # Unregister zeroconf service
+    zeroconf_instance = await zeroconf.async_get_instance(hass)
+    info = hass.data[DOMAIN][entry.entry_id].get('zeroconf_info')
+    if info:
+        await zeroconf_instance.async_unregister_service(info)
+
+    site: web.TCPSite = hass.data[DOMAIN][entry.entry_id]['BLGWServer']
     await site.stop()
-    hipserver : HIPServer = hass.data[DOMAIN][entry.entry_id]['HIPServer']
+    hipserver: asyncio.Server = hass.data[DOMAIN][entry.entry_id]['HIPServer']
     hipserver.close()
+    await hipserver.wait_closed()
+
+    # Clean up hass.data
+    hass.data[DOMAIN].pop(entry.entry_id)
+
     return True
 
 def get_local_address() -> str:

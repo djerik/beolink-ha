@@ -23,6 +23,7 @@ You login using your Home Assistant user name and password. If you are using Tru
 - 2024-01-25 Major overhaul of code
 - 2024-01-26 Fixed import path blocking config flow
 - 2024-02-22 Fixed bugs in thermostat handling and added support for BeoLink 2 app
+- 2025-12-31 Lots of bugfixes
 
 ## Known limitations
 - Only BeoPlay devices are supported via the BeoPlay component https://github.com/giachello/beoplay

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import random
-from typing import Any, Optional
+from typing import Any
 
 import voluptuous as vol
 
@@ -13,10 +13,14 @@ from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_DOMAIN
 from homeassistant.components.remote import DOMAIN as REMOTE_DOMAIN
-from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
 from homeassistant.const import ATTR_FRIENDLY_NAME, CONF_DOMAINS, CONF_NAME, CONF_PORT
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv, entity_registry as er
 from homeassistant.helpers.entityfilter import (
     CONF_EXCLUDE_ENTITIES,
@@ -34,7 +38,7 @@ from .const import (
 
 INCLUDE_EXCLUDE_MODES = [MODE_EXCLUDE, MODE_INCLUDE]
 
-BEOLINK_CREATE_SCHEMA = vol.Schema({vol.Required(CONF_NAME,default="BLGW"): str, vol.Required(CONF_PORT,default=80): int})
+BEOLINK_CREATE_SCHEMA = vol.Schema({vol.Required(CONF_NAME, default="BLGW"): str, vol.Required(CONF_PORT, default=80): int})
 
 SUPPORTED_DOMAINS = [
     ALARM_DOMAIN,
@@ -59,9 +63,9 @@ DEFAULT_DOMAINS = [
 class BeoLinkConfigFlow(ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    data: Optional[dict[str, Any]]
+    data: dict[str, Any] | None
 
-    async def async_step_user(self, user_input: Optional[dict[str, Any]] = None):
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """User initiated a flow via the user interface."""
         if user_input is not None:
             self.data = user_input
@@ -85,24 +89,25 @@ class BeoLinkConfigFlow(ConfigFlow, domain=DOMAIN):
 class BeoLinkOptionsFlowHandler(OptionsFlow):
     """Handle BeoLink options."""
 
+    bl_options: dict[str, Any]
+
     def __init__(self, config_entry: ConfigEntry) -> None:
         """Initialize BeoLink options flow."""
-        self.config_entry = config_entry
-        self.bl_options: dict[str, Any] | None = None
+        # config_entry is automatically available via the base class property
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage BeoLink options."""
+        # Initialize bl_options from config entry options
+        self.bl_options = dict(self.config_entry.options)
+
         if user_input is not None:
             #return self.async_create_entry(title="BeoLink", data=user_input)
             self.bl_options.update(user_input)
             if user_input[CONF_INCLUDE_EXCLUDE_MODE] == MODE_INCLUDE:
                 return await self.async_step_include()
             return await self.async_step_exclude()
-
-        #self.bl_options = deepcopy(dict(self.config_entry.data))
-        self.bl_options = dict(self.config_entry.options)
         name_to_type_map = await _async_name_to_type_map(self.hass)
 
         return self.async_show_form(
@@ -113,7 +118,7 @@ class BeoLinkOptionsFlowHandler(OptionsFlow):
                         CONF_NAME,
                         default=self.bl_options.get(CONF_NAME),
                     ): str,
-                    vol.Required(CONF_PORT,default=self.bl_options.get(CONF_PORT)): int,
+                    vol.Required(CONF_PORT, default=self.bl_options.get(CONF_PORT)): int,
                     vol.Required(
                         CONF_INCLUDE_EXCLUDE_MODE, default=self.bl_options.get(CONF_INCLUDE_EXCLUDE_MODE)
                     ): vol.In(INCLUDE_EXCLUDE_MODES),
@@ -126,13 +131,11 @@ class BeoLinkOptionsFlowHandler(OptionsFlow):
 
     async def async_step_include(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Choose entities to include from the domain on the bridge."""
         domains = self.bl_options[CONF_DOMAINS]
         if user_input is not None:
-            entities = cv.ensure_list(user_input[CONF_INCLUDE_ENTITIES])
             self.bl_options.update(user_input)
-
             return self.async_create_entry(title="BeoLink", data=self.bl_options)
 
         entities = self.bl_options.get(CONF_INCLUDE_ENTITIES, {})
@@ -161,14 +164,12 @@ class BeoLinkOptionsFlowHandler(OptionsFlow):
 
     async def async_step_exclude(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Choose entities to exclude from the domain on the bridge."""
         domains = self.bl_options[CONF_DOMAINS]
 
         if user_input is not None:
-            entities = cv.ensure_list(user_input[CONF_EXCLUDE_ENTITIES])
             self.bl_options.update(user_input)
-
             return self.async_create_entry(title="BeoLink", data=self.bl_options)
 
         entities = self.bl_options.get(CONF_EXCLUDE_ENTITIES, {})
@@ -194,14 +195,6 @@ class BeoLinkOptionsFlowHandler(OptionsFlow):
             ),
         )
 
-    @callback
-    def _async_current_names(self) -> set[str]:
-        """Return a set of bridge names."""
-        return {
-            entry.data[CONF_NAME]
-            for entry in self._async_current_entries(include_ignore=False)
-            if CONF_NAME in entry.data
-        }
 
 async def _async_domain_names(hass: HomeAssistant, domains: list[str]) -> str:
     """Build a list of integration names from domains."""
@@ -212,7 +205,7 @@ async def _async_domain_names(hass: HomeAssistant, domains: list[str]) -> str:
 
 
 async def _async_name_to_type_map(hass: HomeAssistant) -> dict[str, str]:
-    """Create a mapping of types of devices/entities HomeKit can support."""
+    """Create a mapping of types of devices/entities BeoLink can support."""
     integrations = await async_get_integrations(hass, SUPPORTED_DOMAINS)
     return {
         domain: integration_or_exception.name
