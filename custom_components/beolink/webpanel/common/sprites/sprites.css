@@ -1,0 +1,116 @@
+/*a  json file with description of icons for the UI lives inside jsoneditor.js */
+i.m-icon {
+    background: url(sprites-m.png) no-repeat top left;
+    display: inline-block;
+    vertical-align: middle;
+    width: 52px; height: 52px; 
+}
+
+i.m-icon.ac-cool{ background-position: 0 0; width: 52px; height: 52px; } 
+.off i.m-icon.ac-cool{ background-position: 0 -102px; width: 52px; height: 52px; } 
+i.m-icon.ac-dehum{ background-position: 0 -204px; width: 52px; height: 52px; } 
+.off i.m-icon.ac-dehum{ background-position: 0 -306px; width: 52px; height: 52px; } 
+i.m-icon.ac-fan{ background-position: 0 -408px; width: 52px; height: 52px; } 
+.off i.m-icon.ac-fan{ background-position: 0 -510px; width: 52px; height: 52px; } 
+i.m-icon.ac-flow{ background-position: 0 -612px; width: 52px; height: 52px; } 
+.off i.m-icon.ac-flow{ background-position: 0 -714px; width: 52px; height: 52px; } 
+i.m-icon.ac-generic{ background-position: 0 -816px; width: 52px; height: 52px; } 
+.off i.m-icon.ac-generic{ background-position: 0 -918px; width: 52px; height: 52px; } 
+i.m-icon.ac-heat{ background-position: 0 -1020px; width: 52px; height: 52px; } 
+.off i.m-icon.ac-heat{ background-position: 0 -1122px; width: 52px; height: 52px; } 
+i.m-icon.ac-sumwin{ background-position: 0 -1224px; width: 52px; height: 52px; } 
+.off i.m-icon.ac-sumwin{ background-position: 0 -1326px; width: 52px; height: 52px; } 
+i.m-icon.extra-alarm{ background-position: 0 -1428px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-alarm{ background-position: 0 -1530px; width: 52px; height: 52px; } 
+i.m-icon.extra-config{ background-position: 0 -1632px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-config{ background-position: 0 -1734px; width: 52px; height: 52px; } 
+i.m-icon.extra-fav{ background-position: 0 -1836px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-fav{ background-position: 0 -1938px; width: 52px; height: 52px; } 
+i.m-icon.extra-gong{ background-position: -102px 0; width: 52px; height: 52px; } 
+.off i.m-icon.extra-gong{ background-position: -102px -102px; width: 52px; height: 52px; } 
+i.m-icon.extra-key{ background-position: -102px -204px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-key{ background-position: -102px -306px; width: 52px; height: 52px; } 
+i.m-icon.extra-keyway{ background-position: -102px -408px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-keyway{ background-position: -102px -510px; width: 52px; height: 52px; } 
+i.m-icon.extra-lock{ background-position: -102px -612px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-lock{ background-position: -102px -714px; width: 52px; height: 52px; } 
+i.m-icon.extra-music{ background-position: -102px -816px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-music{ background-position: -102px -918px; width: 52px; height: 52px; } 
+i.m-icon.extra-shades{ background-position: -102px -1020px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-shades{ background-position: -102px -1122px; width: 52px; height: 52px; } 
+i.m-icon.extra-sprinkler{ background-position: -102px -1224px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-sprinkler{ background-position: -102px -1326px; width: 52px; height: 52px; } 
+i.m-icon.extra-star1{ background-position: -102px -1428px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-star1{ background-position: -102px -1530px; width: 52px; height: 52px; } 
+i.m-icon.extra-star2{ background-position: -102px -1632px; width: 52px; height: 52px; } 
+.off i.m-icon.extra-star2{ background-position: -102px -1734px; width: 52px; height: 52px; } 
+i.m-icon.led-green{ background-position: -102px -1836px; width: 52px; height: 52px; } 
+i.m-icon.led{ background-position: -102px -1938px; width: 52px; height: 52px; } 
+.off i.m-icon.led{ background-position: -204px 0; width: 52px; height: 52px; } 
+i.m-icon.light-bulb{ background-position: -204px -102px; width: 52px; height: 52px; } 
+.off i.m-icon.light-bulb{ background-position: -204px -204px; width: 52px; height: 52px; } 
+i.m-icon.light-ceiling{ background-position: -204px -306px; width: 52px; height: 52px; } 
+.off i.m-icon.light-ceiling{ background-position: -204px -408px; width: 52px; height: 52px; } 
+i.m-icon.light-floor{ background-position: -204px -510px; width: 52px; height: 52px; } 
+.off i.m-icon.light-floor{ background-position: -204px -612px; width: 52px; height: 52px; } 
+i.m-icon.light-table{ background-position: -204px -714px; width: 52px; height: 52px; } 
+.off i.m-icon.light-table{ background-position: -204px -816px; width: 52px; height: 52px; } 
+
+i.s-icon {
+    background: url(sprites-s.png) no-repeat top left;
+    display: inline-block;
+    vertical-align: middle;
+}
+i.s-icon.ac-cool{ background-position: 0 0; width: 25px; height: 25px; } 
+.off i.s-icon.ac-cool{ background-position: 0 -75px; width: 25px; height: 25px; } 
+i.s-icon.ac-dehum{ background-position: 0 -150px; width: 25px; height: 25px; } 
+.off i.s-icon.ac-dehum{ background-position: 0 -225px; width: 25px; height: 25px; } 
+i.s-icon.ac-fan{ background-position: 0 -300px; width: 25px; height: 25px; } 
+.off i.s-icon.ac-fan{ background-position: 0 -375px; width: 25px; height: 25px; } 
+i.s-icon.ac-flow{ background-position: 0 -450px; width: 25px; height: 25px; } 
+.off i.s-icon.ac-flow{ background-position: 0 -525px; width: 25px; height: 25px; } 
+i.s-icon.ac-generic{ background-position: 0 -600px; width: 25px; height: 25px; } 
+.off i.s-icon.ac-generic{ background-position: 0 -675px; width: 25px; height: 25px; } 
+i.s-icon.ac-heat{ background-position: 0 -750px; width: 25px; height: 25px; } 
+.off i.s-icon.ac-heat{ background-position: 0 -825px; width: 25px; height: 25px; } 
+i.s-icon.ac-sumwin{ background-position: 0 -900px; width: 25px; height: 25px; } 
+.off i.s-icon.ac-sumwin{ background-position: 0 -975px; width: 25px; height: 25px; } 
+i.s-icon.extra-alarm{ background-position: 0 -1050px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-alarm{ background-position: 0 -1125px; width: 25px; height: 25px; } 
+i.s-icon.extra-config{ background-position: 0 -1200px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-config{ background-position: 0 -1275px; width: 25px; height: 25px; } 
+i.s-icon.extra-fav{ background-position: 0 -1350px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-fav{ background-position: 0 -1425px; width: 25px; height: 25px; } 
+i.s-icon.extra-gong{ background-position: 0 -1500px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-gong{ background-position: 0 -1575px; width: 25px; height: 25px; } 
+i.s-icon.extra-key{ background-position: 0 -1650px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-key{ background-position: 0 -1725px; width: 25px; height: 25px; } 
+i.s-icon.extra-keyway{ background-position: 0 -1800px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-keyway{ background-position: 0 -1875px; width: 25px; height: 25px; } 
+i.s-icon.extra-lock{ background-position: -75px 0; width: 25px; height: 25px; } 
+.off i.s-icon.extra-lock{ background-position: -75px -75px; width: 25px; height: 25px; } 
+i.s-icon.extra-music{ background-position: -75px -150px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-music{ background-position: -75px -225px; width: 25px; height: 25px; } 
+i.s-icon.extra-shades{ background-position: -75px -300px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-shades{ background-position: -75px -375px; width: 25px; height: 25px; } 
+i.s-icon.extra-sprinkler{ background-position: -75px -450px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-sprinkler{ background-position: -75px -525px; width: 25px; height: 25px; } 
+i.s-icon.extra-star1{ background-position: -75px -600px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-star1{ background-position: -75px -675px; width: 25px; height: 25px; } 
+i.s-icon.extra-star2{ background-position: -75px -750px; width: 25px; height: 25px; } 
+.off i.s-icon.extra-star2{ background-position: -75px -825px; width: 25px; height: 25px; } 
+i.s-icon.led-green{ background-position: -75px -900px; width: 25px; height: 25px; } 
+i.s-icon.led{ background-position: -75px -975px; width: 25px; height: 25px; } 
+.off i.s-icon.led{ background-position: -75px -1050px; width: 25px; height: 25px; } 
+i.s-icon.light-bulb{ background-position: -75px -1125px; width: 25px; height: 25px; } 
+.off i.s-icon.light-bulb{ background-position: -75px -1200px; width: 25px; height: 25px; } 
+i.s-icon.light-ceiling{ background-position: -75px -1275px; width: 25px; height: 25px; } 
+.off i.s-icon.light-ceiling{ background-position: -75px -1350px; width: 25px; height: 25px; } 
+i.s-icon.light-floor{ background-position: -75px -1425px; width: 25px; height: 25px; } 
+.off i.s-icon.light-floor{ background-position: -75px -1500px; width: 25px; height: 25px; } 
+i.s-icon.light-table{ background-position: -75px -1575px; width: 25px; height: 25px; } 
+.off i.s-icon.light-table{ background-position: -75px -1650px; width: 25px; height: 25px; } 
+
+
+
+

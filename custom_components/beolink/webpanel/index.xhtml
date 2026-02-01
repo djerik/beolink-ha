@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "ce-html-1.0-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" style="overflow:hidden">
+    <head>
+        <meta http-equiv="content-type" content="application/ce-html+xml;charset=UTF-8"/>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+        <title>BeoLink Gateway</title>
+        <meta name="description" content=""/>
+        <meta name="viewport" content="width=1280,height=720,user-scalable=no"/>
+        <link rel="stylesheet" href="styles/main.css"/>
+        <link rel="stylesheet" href="/common/sprites/allsprites.css"/>
+    </head>
+    <body ng-app="simpleApp" style="overflow:hidden">
+        <!--[if lte IE 9]><p style="position:fixed; top:20%; right:50%; width:50%; padding: 2ex; margin-right:-25%; background: #EEE; text-align:center;">
+      You are using an outdated browser. Please upgrade your browser in order to use BLGW.<![endif]-->
+        <!--[if !lte IE 9]>-->
+        <div ng-include="'views/mainTv.html'"></div>
+        <div class="state" ng-show="getModelStateIsProcessing()||!getModelStateIsConnected()" ng-controller="stateCtrl">
+            <div class="connectionState">
+                <div class="connectionStateContent well">
+                    <div class="spinner" ng-show="getModelStateIsProcessing()"></div>
+                    <div ng-bind="getModelStateDescription()"></div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            // global variable used to identify tvApp
+            var isTvApp = true;
+            //Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36 WebAppManager
+            var reWebOS = /Web0S; Linux\/SmartTV/;
+            var isWebOS = navigator.userAgent.match(reWebOS);
+        </script>
+        <script src="scripts/modules.js"></script>
+        <script src="scripts/scripts.js"></script>
+    </body>
+</html>

@@ -1,0 +1,13 @@
+{
+    "subscriptions": [
+        {
+            "id": 1,
+            "backends": [
+                "projectInfo",
+                "macros",
+                "resources",
+                "systems"
+           ]
+        }
+    ]
+}

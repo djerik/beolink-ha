@@ -1,0 +1,9 @@
+<div class="layout layoutWeb" ng-controller="MainCtrl" ng-init="displayAll=true">
+    <div ng-show="authService.logged && configLoaded">
+        <div ng-include="'views/partials/zonesWeb.html'" class="zonesPanelOuter" ng-class="{'zonesClosed': currentPanelFocus!= 'zones'}"></div>
+        <div ng-include="'views/partials/widgetsWeb.html'" class="widgetsPanelOuter" ik-focusin="setPanelFocus('widgets')" ng-class="{'widgetClosed': currentPanelFocus != 'widgets'}"></div>
+    </div>
+    <div ng-show="!authService.logged">
+        <div ng-include="'views/partials/login.html'"></div>
+    </div>
+</div>

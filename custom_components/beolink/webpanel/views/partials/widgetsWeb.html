@@ -1,0 +1,23 @@
+<div class="widgetsPanel clearfix" ng-class="{'showMe':(displayAll && currentZone.id),
+             'withAV':(currentZone.hasAVSources)}" ng-show="currentZone" ik-equal-height="panel">
+    <div class="label-wrapper" ng-show="currentZone">
+        <a href="#">
+            <div class="areaName">
+                <span ng-bind="currentZone.area.name" class="wrap-text dsg-text"></span>
+            </div>
+            <div class="zoneName">
+                <h2 class="wrap-text dsg-text">
+                    <span ng-bind="currentZone.name"></span>
+                </h2>
+            </div>
+        </a>
+    </div>
+    <div class="widgetsContainerOuter">
+        <div class="widgetsContainerInner">
+            <div ng-repeat="group in currentZone.showableGroups track by $index" class="block" ik-set-max-height="$last">
+                <div ng-repeat="res in group  track by res.id" class="widget cont" resource="res" ng-class="isResourceOnline(res)?'resource-is-online':'resource-is-offline'" id="{{($parent.$last?'widget-last':$parent.$first?'widget-first':'widget-$parent.$index')}}" style="{{$parent.$first?'nav-up: #widget-last;':($parent.$last?'nav-down: #widget-first;':'')}} nav-left:#zone-0" ng-set-focus="$parent.$parent.currentResource == res.id" tabindex="1"></div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="currentZone.hasAVSources" av-control="currentZone.AVSources" class="sourcesPanelOuter block"></div>
+</div>

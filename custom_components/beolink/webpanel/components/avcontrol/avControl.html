@@ -1,0 +1,25 @@
+<div class="sources animateLeft" ng-class="close?'hide':'show'" ik-equal-height="panel">
+    <div class="status" ng-show="selected">
+        <h2 ng-click="select(selected)">{{selected.name}} </h2>
+    </div>
+    <div class="sourceSelection animateUp" ng-class="showSources=='tv'||( !selected && showSources!='music')?'show':'hide'">
+        <ul>
+            <li ng-repeat="s in tvSources track by s.id" ng-class="{'selected': selected.id==s.id}" ng-click="select(s);">{{s.name}}</li>
+        </ul>
+    </div>
+    <div class="sourceSelection animateUp" ng-class="showSources=='music'?'show':'hide'">
+        <ul>
+            <li ng-repeat="s in musicSources track by s.id" ng-class="{'selected': selected.id==s.id}" ng-click="select(s);">{{s.name}}</li>
+        </ul>
+    </div>
+    <div class="sourceCommands">
+        <div class="sourceSelect">
+            <a ng-click="showSources='tv'" ng-class="{'disabled': tvSources.length == 0}">TV</a>
+            <a ng-click="showSources='music'" ng-class="{'disabled': musicSources.length == 0}">MUSIC</a>
+        </div>
+        <div ng-show="selected">
+            <div src-control="selected"></div>
+        </div>
+    </div>
+</div>
+<div class="sources" src-quick-control="selected"></div>

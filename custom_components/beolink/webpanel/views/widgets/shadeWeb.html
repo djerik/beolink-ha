@@ -1,0 +1,49 @@
+<div class="button-wrapper disabled button">
+    <div class="button-content">
+        <div class="icon-wrapper side-state">
+            <div class="bottom off">
+                <i class="resource-icon shade off"></i>
+            </div>
+            <div class="top" ng-style="{'opacity':resource.state.LEVEL/100 , 'visibility':resource.state.LEVEL>=0?'visible':'hidden'}">
+                <i class="resource-icon shade on"></i>
+            </div>
+        </div>
+        <div class="button-label wrap-text dsg-text button">
+            <span ng-bind="resource.name"></span>
+        </div>
+    </div>
+</div>
+<div class="commands">
+    <div class="grid command-row raiselower command-shade">
+        <div class="col-1-4">
+            <div class="button-dark raise" ng-class="hasRAISE?'':'disabled'" hm-tap="RAISE()">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon">
+                        <i class="glyphicon glyphicon-chevron-up"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-1-2">
+            <div class="button-dark stop" ng-class="hasSTOP?'':'disabled'" hm-tap="STOP()">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon">
+                        <i class="glyphicon glyphicon-stop"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-1-4">
+            <div class="button-dark lower" ng-class="hasLOWER?'':'disabled'" hm-tap="LOWER()">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon">
+                        <i class="glyphicon glyphicon-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-if="resource.state.LEVEL>=0" class="meter-wrapper">
+        <div class="meter"></div>
+    </div>
+</div>

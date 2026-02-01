@@ -1,0 +1,17 @@
+{
+    "systems": [
+        {
+            "id": 2603,
+            "beoMasterHost": "",
+            "hints": [],
+            "name": "BeoLink",
+            "publish": true,
+            "system:bldriver": true,
+            "links": {
+                "activeChannel": null,
+                "channels": [],
+                "spec": 2001,
+                "state": 1103,
+                "zone": 1413
+            }
+        }]}

@@ -1,0 +1,29 @@
+<div class="quickcontrols">
+    <ul>
+        <li ng-click="$parent.close=!$parent.close">
+            <div ng-hide="$parent.close">&#x21e5;</div>
+            <div ng-show="$parent.close">&#x21e4;</div>
+        </li>
+        <li ng-click="exec('STEP_UP')">
+            <i class="flow-icon-s next"></i>
+        </li>
+        <li ng-click="exec('STEP_DW')">
+            <i class="flow-icon-s prev"></i>
+        </li>
+        <li ng-click="exec('ANALOG_UP_1_Volume_UP')">
+            <i class="flow-icon-s vol_incress"></i>
+        </li>
+        <li ng-click="exec('ANALOG_DW_1_Volume_DOWN')">
+            <i class="flow-icon-s vol_decress"></i>
+        </li>
+        <li class="label" ng-click="exec('MUTE')">MUTE</li>
+        <li ng-click="standby()" class="red">
+            <b>
+                <span ng-show="!showAllStandby">&#x25CB;</span>
+                <span ng-show="showAllStandby" class="label">
+                    <small>ALL STANDBY</small>
+                </span>
+            </b>
+        </li>
+    </ul>
+</div>

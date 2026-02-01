@@ -1,0 +1,18 @@
+<div class="button-wrapper button">
+    <div class="button-content">
+        <div class="icon-wrapper side-state">
+            <div class="bottom off">
+                <i class="resource-icon shade off"></i>
+            </div>
+            <div class="top" ng-style="{'opacity':resource.state.LEVEL/100 , 'visibility':resource.state.LEVEL>=0?'visible':'hidden'}">
+                <i class="resource-icon shade on"></i>
+            </div>
+        </div>
+        <div class="button-label wrap-text dsg-text button">
+            <span ng-bind="resource.name"></span>
+        </div>
+        <div ng-if="resource.state.LEVEL>=0" class="meter-wrapper">
+            <div class="meter"></div>
+        </div>
+    </div>
+</div>

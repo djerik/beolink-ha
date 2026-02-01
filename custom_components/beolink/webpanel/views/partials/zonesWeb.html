@@ -1,0 +1,31 @@
+<div class="zonesPanel" ng-class="{'showMe':displayAll}" tabindex="1" ik-equal-height="panel">
+    <a href="#" ng-if="zonesWithRes.length > 0">
+        <h2>zones</h2>
+    </a>
+    <div class="zonesContainerOuter">
+        <div class="zonesContainerInner">
+            <ul>
+                <li ng-if="zonesWithRes.length === 0">
+                    <div class="zoneLabelContainer">
+                        <div class="zoneLabel wrap-text dsg-text" title="{{zone.name}}">No zone defined!</div>
+                        <div class="zoneAreaLabel wrap-text dsg-text">There is no zone with controllable elements defined</div>
+                    </div>
+                </li>
+                <li class="zone" data-ng-repeat="zone in zonesWithRes track by zone.id" data-ng-click="setZoneIfFocused(zone)" data-ng-class="(currentZone.id == zone.id)?'selected':''" tabindex="1" id="{{($last?'zone-last':'zone-'+$index)}}" style="{{$first?'nav-up: #zone-last;':($last?'nav-down: #zone-0;':'') }} nav-right: #widget-first">
+                    <i class="zone-icon-s {{zone.icon}}" ng-class="zoneSelected(zone.id)?'active':''"></i>
+                    <div class="zoneLabelContainer">
+                        <div class="zoneAreaLabel wrap-text dsg-text" title="{{zone.area.name}}">
+                            <span ng-bind="zone.area.name"></span>
+                        </div>
+                        <div class="zoneLabel wrap-text dsg-text" title="{{zone.name}}">
+                            <span ng-bind="zone.name"></span>
+                        </div>
+                        <div class="states">
+                            <div class="zone-state" list="zone.showableResources"></div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

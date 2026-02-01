@@ -1,0 +1,80 @@
+{
+    "states": [
+        {
+            "id": 1101,
+            "asr": 1035,
+            "ass": 311,
+            "bsr": -405,
+            "bss": -1130,
+            "day": 6,
+            "hour": 0,
+            "minute": 18,
+            "month": 1,
+            "sr": -405,
+            "ss": 311,
+            "weekday": 2,
+            "links": {
+                "owner": 2601,
+                "spec": 15041
+            }
+        },
+        {
+            "id": 1102,
+            "CURRENT FIRMWARE": "1.5.4.557",
+            "LATEST FIRMWARE": "Already updated.",
+            "ROLLBACK AVAILABLE": "1.5.4.533_2023.01.31-22.01.55",
+            "SYSTEM INFO": "READY",
+            "revision": "212",
+            "links": {
+                "owner": 2602,
+                "spec": 15042
+            }
+        },
+        {
+            "id": 1103,
+            "CONNECTION": "Online",
+            "links": {
+                "owner": 2603,
+                "spec": 1501
+            }
+        },
+        {
+            "id": 1105,
+            "nowPlaying": "",
+            "nowPlayingDetails": "",
+            "online": "Yes",
+            "sourceName": "Apple TV",
+            "sourceUniqueId": "HDMI_C:7051.1860672.31706715@products.bang-olufsen.com",
+            "state": "Play",
+            "volume": 15,
+            "links": {
+                "owner": 2707,
+                "spec": 1502
+            }
+        },
+        {
+            "id": 1201,
+            "position": 50,
+            "links": {
+                "owner": 3001,
+                "spec": null
+            }
+        },
+        {
+            "id": 1202,
+            "position": 75,
+            "links": {
+                "owner": 3002,
+                "spec": null
+            }
+        },
+        {
+            "id": 1203,
+            "position": 0,
+            "links": {
+                "owner": 3003,
+                "spec": null
+            }
+        }
+    ]
+}
