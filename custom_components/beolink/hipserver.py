@@ -13,8 +13,8 @@ from homeassistant.components.alarm_control_panel import (
     SERVICE_ALARM_DISARM,
     AlarmControlPanelState,
 )
+from homeassistant.components.camera import DOMAIN as CAMERA_DOMAIN
 from homeassistant.components.climate import (
-    ATTR_CURRENT_TEMPERATURE,
     DOMAIN as CLIMATE_DOMAIN,
     SERVICE_SET_TEMPERATURE,
 )
@@ -38,14 +38,17 @@ from homeassistant.components.light import (
 )
 from homeassistant.components.media_player import (
     ATTR_INPUT_SOURCE,
+    ATTR_INPUT_SOURCE_LIST,
     ATTR_MEDIA_VOLUME_LEVEL,
     ATTR_MEDIA_VOLUME_MUTED,
     DOMAIN as MEDIA_PLAYER_DOMAIN,
+    SERVICE_SELECT_SOURCE,
 )
 from homeassistant.components.remote import (
     DOMAIN as REMOTE_DOMAIN,
     SERVICE_SEND_COMMAND,
 )
+from homeassistant.components.scene import DOMAIN as SCENE_DOMAIN
 from homeassistant.const import (
     ATTR_CODE,
     ATTR_ENTITY_ID,
@@ -74,7 +77,17 @@ from homeassistant.helpers import area_registry as ar, device_registry as dr
 from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.util.color import color_temperature_to_hs
 
-from .const import MODE_EXCLUDE, MODE_INCLUDE
+from .helpers import (
+    EntityFilterMixin,
+    find_scene_by_name,
+    get_current_temperature,
+    get_entity_area_id,
+    get_entity_from_state,
+    get_scene_entities,
+    get_target_temperature,
+    is_entity_name_valid,
+)
+from .helpers.entity_helpers import SUPPORTED_RESOURCE_DOMAINS
 
 REMOTE_MAPPING = { "BACK" : "Cursor/Back",
                 "CURSOR_LEFT" : "Cursor/Left",
@@ -134,10 +147,10 @@ class HIPRessource:
                     )
         elif self.domain == CLIMATE_DOMAIN:
 
-            current_temp = _get_current_temperature(state)
+            current_temp = get_current_temperature(state)
             if current_temp is not None:
                 states.append( self.state_path + "TEMPERATURE=" + str(current_temp))
-            target_temp = _get_target_temperature(state)
+            target_temp = get_target_temperature(state)
             if target_temp is not None:
                 states.append( self.state_path + "SETPOINT=" + str(target_temp))
 
@@ -175,8 +188,8 @@ class HIPRessource:
                             + str(round(brightness / 255 * 100, 0) if brightness is not None else 0)
                             + ")"
                         )
-            except (KeyError, ValueError, TypeError, IndexError) as err:
-                    _LOGGER.exception("Problems handling color for state %s: %s", state.name, err)
+            except (KeyError, ValueError, TypeError, IndexError):
+                    _LOGGER.exception("Problems handling color for state %s", state.name)
         elif self.domain == ALARM_DOMAIN:
             if state.state in (AlarmControlPanelState.ARMED_HOME, AlarmControlPanelState.ARMED_AWAY):
                 states.append(self.state_path + "ALARM=0&READY=1&MODE=ARM")
@@ -197,18 +210,17 @@ class HIPRessource:
                 m_p_state = "Play"
             temp += "&state=" + m_p_state
             temp += "&volume=" + str(int(attributes.get(ATTR_MEDIA_VOLUME_LEVEL, 0)*100))
-            states.append( temp )
+            states.append( self.state_path +temp )
 
         return states
 
-class HIPServer(asyncio.Protocol):
+class HIPServer(asyncio.Protocol, EntityFilterMixin):
     """Server handling the HIP protocol."""
 
     state = "awaiting user"
 
     def __init__(self, include_entities: list[str], exclude_entities: list[str], include_exclude_mode: str, hass: core.HomeAssistant) -> None:
         """Init HIPServer."""
-
         self.include_entities = include_entities
         self.exclude_entities = exclude_entities
         self.include_exclude_mode = include_exclude_mode
@@ -232,43 +244,34 @@ class HIPServer(asyncio.Protocol):
     def _handle_query_all_resources(self) -> None:
         """Handle query for all resources."""
         self.send_ok_line("q */*/*/*")
-        states = self.hass.states.async_all()
 
         dr_reg = dr.async_get(self.hass)
         area_reg = ar.async_get(self.hass)
-        for state in states:
-            if state.domain not in {
-                COVER_DOMAIN,
-                LIGHT_DOMAIN,
-                CLIMATE_DOMAIN,
-                ALARM_DOMAIN,
-                MEDIA_PLAYER_DOMAIN,
-            }:
+
+        # Process regular resources (cameras are handled separately via MJPEG/snapshot)
+        for state in self.hass.states.async_all():
+            if state.domain not in SUPPORTED_RESOURCE_DOMAINS:
                 continue
-            if self.include_exclude_mode == MODE_INCLUDE and state.entity_id not in self.include_entities:
+            if state.domain == CAMERA_DOMAIN:
                 continue
-            if self.include_exclude_mode == MODE_EXCLUDE and state.entity_id in self.exclude_entities:
+            if not self.should_include_entity(state.entity_id):
                 continue
-            if "?" in state.name or "/" in state.name:
-                _LOGGER.info("Entity %s contains illegal character (? or /) for BeoLink usage", state.name)
+            if not is_entity_name_valid(state.name):
+                _LOGGER.info("Entity %s has invalid name for BeoLink usage", state.name)
                 continue
-            domain = self.hass.data.get(state.domain)
-            if domain is None:
+
+            entity = get_entity_from_state(self.hass, state)
+            if entity is None:
                 continue
-            entity = domain.get_entity(state.entity_id)
-            if entity is None or entity.registry_entry is None:
-                continue
-            area_id = entity.registry_entry.area_id
+
+            area_id = get_entity_area_id(self.hass, entity, dr_reg)
             if area_id is None:
-                device = dr_reg.async_get(entity.registry_entry.device_id)
-                if device is None:
-                    continue
-                area_id = device.area_id
-                if area_id is None:
-                    continue
+                continue
+
             area = area_reg.async_get_area(area_id)
             if area is None:
                 continue
+
             ressource = HIPRessource(
                 state.domain,
                 entity,
@@ -287,6 +290,14 @@ class HIPServer(asyncio.Protocol):
             )
             self.handle_resource_state_data(state.entity_id, state, state.attributes)
 
+        # List scenes as MACRO resources
+        for scene_info in get_scene_entities(self.hass):
+            area = area_reg.async_get_area(scene_info["area_id"])
+            if area is None:
+                continue
+            macro_path = f"House/{quote(area.name, safe='')}/MACRO/{quote(scene_info['name'], safe='')}/"
+            self.send_response_line(macro_path)
+
     def _handle_command(self, line: str) -> None:
         """Handle command from client."""
         try:
@@ -297,6 +308,12 @@ class HIPServer(asyncio.Protocol):
             action = command[4]
             entity_name = command[3]
             ressource_type = command[2]
+
+            # Handle MACRO type separately (scenes are not registered as HIP resources)
+            if ressource_type == "MACRO":
+                self._handle_macro_command(action, entity_name)
+                self.send_ok_line("c ")
+                return
 
             if entity_name not in self.hip_ressources_by_entity_name:
                 _LOGGER.warning("Entity '%s' not found in registered HIP resources", entity_name)
@@ -432,19 +449,58 @@ class HIPServer(asyncio.Protocol):
         if "?" in str(action):
             qs = str(action).split("?")[1]
             parameters = parse_qs(qs)
-        entity = self.hass.data[MEDIA_PLAYER_DOMAIN].get_entity(hip_ressource.entity_id)
         service = None
         if action == "Standby":
             service = SERVICE_TURN_OFF
         if action.startswith("Select source by id") and "sourceUniqueId" in parameters:
-            entity.select_source(parameters["sourceUniqueId"][0])
+            service = SERVICE_SELECT_SOURCE
+            source_id = parameters["sourceUniqueId"][0]
+
+            # Use state attributes to get source list (proper HA API)
+            state = self.hass.states.get(hip_ressource.entity_id)
+            if state:
+                source_list = state.attributes.get(ATTR_INPUT_SOURCE_LIST, [])
+
+                # Try exact match first
+                if source_id in source_list:
+                    params[ATTR_INPUT_SOURCE] = source_id
+                else:
+                    # Use the entity object already stored in HIPRessource
+                    entity = hip_ressource.entity
+                    if entity and hasattr(entity, "_speaker"):
+                        try:
+                            index = entity._speaker.sourcesID.index(source_id)
+                            params[ATTR_INPUT_SOURCE] = entity._speaker.sources[index]
+                        except (ValueError, AttributeError, IndexError):
+                            _LOGGER.warning(
+                                "Could not find source for sourceUniqueId '%s' on entity '%s'",
+                                source_id,
+                                hip_ressource.entity_id,
+                            )
+                            service = None
+                    else:
+                        _LOGGER.warning(
+                            "Source '%s' not in source_list and entity does not support source mapping",
+                            source_id,
+                        )
+                        service = None
+            else:
+                _LOGGER.warning("Entity '%s' not found", hip_ressource.entity_id)
+                service = None
         if action.startswith("Volume level") and "Level" in parameters:
             service = SERVICE_VOLUME_SET
             params[ATTR_MEDIA_VOLUME_LEVEL] = float(parameters["Level"][0]) / 100
         if action.startswith("Volume adjust") and "Command" in parameters:
             if parameters["Command"][0] == "Mute":
                 service = SERVICE_VOLUME_MUTE
-                params[ATTR_MEDIA_VOLUME_MUTED] = not entity.is_volume_muted
+                # Use state to get current mute status
+                state = self.hass.states.get(hip_ressource.entity_id)
+                if state:
+                    is_muted = state.attributes.get(ATTR_MEDIA_VOLUME_MUTED, False)
+                    params[ATTR_MEDIA_VOLUME_MUTED] = not is_muted
+                else:
+                    # Default to toggling to muted if state not available
+                    params[ATTR_MEDIA_VOLUME_MUTED] = True
         if service is not None:
             self.async_call_service(
                 hip_ressource.entity_id,
@@ -454,21 +510,14 @@ class HIPServer(asyncio.Protocol):
                 params,
             )
         if action.startswith(("Send command", "Beo4 advanced command")):
-            # Find a remote entity in the same area or any available remote entity
+            # Find the remote entity corresponding to this media player
+            # e.g., media_player.beovision_eclipse -> remote.beovision_eclipse
             remote_entity = None
-            for state in self.hass.states.async_all(REMOTE_DOMAIN):
-                if state.entity_id.startswith(f"{REMOTE_DOMAIN}."):
-                    remote_entity = state
-                    # Prefer remote in the same area if available
-                    if hasattr(hip_ressource, 'area_name') and hip_ressource.area_name:
-                        entity_registry = self.hass.data.get("entity_registry")
-                        if entity_registry:
-                            entry = entity_registry.async_get(state.entity_id)
-                            if entry and entry.area_id == hip_ressource.area_name:
-                                remote_entity = state
-                                break
-                    else:
-                        break
+            if hip_ressource.entity_id:
+                remote_entity_id = hip_ressource.entity_id.replace(
+                    f"{MEDIA_PLAYER_DOMAIN}.", f"{REMOTE_DOMAIN}."
+                )
+                remote_entity = self.hass.states.get(remote_entity_id)
 
             if remote_entity and "Command" in parameters:
                 service = SERVICE_SEND_COMMAND
@@ -487,6 +536,30 @@ class HIPServer(asyncio.Protocol):
                     _LOGGER.warning("Unknown remote command: %s", command_key)
             else:
                 _LOGGER.warning("No remote entity found to send command")
+
+    def _handle_macro_command(self, action: str, macro_name: str) -> None:
+        """Handle macro (HA scene) commands.
+
+        Macros in BeoLink map to Home Assistant scenes. When the user taps
+        a scene in the BeoLiving app, it sends a FIRE command.
+        """
+        if action != "FIRE":
+            _LOGGER.warning("Unsupported macro command: %s", action)
+            return
+
+        # Find the scene by its friendly name
+        scene_state = find_scene_by_name(self.hass, macro_name)
+        if scene_state:
+            _LOGGER.debug("Firing scene %s (entity: %s)", macro_name, scene_state.entity_id)
+            self.hass.async_create_task(
+                self.hass.services.async_call(
+                    SCENE_DOMAIN,
+                    "turn_on",
+                    {ATTR_ENTITY_ID: scene_state.entity_id},
+                )
+            )
+        else:
+            _LOGGER.warning("Scene not found for macro: %s", macro_name)
 
     @callback
     def _async_update_event_state_callback(
@@ -617,18 +690,3 @@ class HIPServer(asyncio.Protocol):
                 domain, service, service_data, context=context
             )
         )
-
-def _get_target_temperature(state: State) -> float | None:
-    """Calculate the target temperature from a state."""
-    target_temp = state.attributes.get(ATTR_TEMPERATURE)
-    if isinstance(target_temp, (int, float)):
-        return round(target_temp)
-    return None
-
-
-def _get_current_temperature(state: State) -> float | None:
-    """Calculate the current temperature from a state."""
-    current_temp = state.attributes.get(ATTR_CURRENT_TEMPERATURE)
-    if isinstance(current_temp, (int, float)):
-        return round(current_temp)
-    return None

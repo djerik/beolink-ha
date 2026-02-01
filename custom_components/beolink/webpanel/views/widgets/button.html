@@ -1,0 +1,15 @@
+<div class="button-wrapper button" hm-touch="PRESS()" hm-hold="HOLD()" hm-release="RELEASE()" ng-class="{'act':active}">
+    <div class="button-content" ng-class="resource.state.STATE>=0?'withState':''">
+        <div class="icon-wrapper side-state" style="visibility: hidden" ng-style="{'visibility':resource.state.STATE>=0?'visible':'hidden'}">
+            <div class="bottom">
+                <i class="resource-icon button off"></i>
+            </div>
+            <div class="top" ng-style="{'opacity':resource.state.STATE}">
+                <i class="resource-icon button on"></i>
+            </div>
+        </div>
+        <div class="button-label wrap-text dsg-text">
+            <span ng-bind="resource.name"></span>
+        </div>
+    </div>
+</div>

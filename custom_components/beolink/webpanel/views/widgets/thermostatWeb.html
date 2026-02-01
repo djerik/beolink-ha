@@ -1,0 +1,159 @@
+<div ng-init="toEcomode='Eco Mode'" data-ng-init="toSchedule='Schedule'" class="thermostat">
+    <div class="button-wrapper" ng-click="toggleOnOff()">
+        <div class="button-content">
+            <div class="icon-wrapper side-state" ng-class="resource.state.MODE == 'Off'?'off':'on'">
+                <div ng-switch="resource.state.MODE">
+                    <i ng-switch-when="Heat" class="resource-icon climate-heat"></i>
+                    <i ng-switch-when="Cool" class="resource-icon climate-cool"></i>
+                    <i ng-switch-when="Auto" class="resource-icon climate-auto"></i>
+                    <i ng-switch-when="Em.Heat" class="resource-icon climate-heat"></i>
+                    <i ng-switch-when="Eco" class="resource-icon climate-eco"></i>
+                    <i ng-switch-default="" class="resource-icon climate-auto"></i>
+                </div>
+            </div>
+            <div class="button-label">
+                <span ng-bind="resource.name" class="wrap-text dsg-text"></span>
+            </div>
+            <div class="button-state-right">
+                <div class="temperature" ng-if="resource.state['TEMPERATURE'] > -273">
+                    <span class="level" ng-bind="resource.state['TEMPERATURE']+'°'+units.temperature"></span>
+                    <span class="type"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="commands">
+        <div class="grid command-row modes mode-thermo" ng-if="hasSET_MODE">
+            <div class="col-1-{{NOF_MODES}}" ng-show="IS_VALID_MODES['Off']">
+                <div class="button-dark" ng-click="SET_MODE('Off')">
+                    <div class="icon-wrapper">
+                        <div class="off">
+                            <i class="s-icon ac-sumwin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1-{{NOF_MODES}}" ng-show="IS_VALID_MODES['Heat']">
+                <div class="button-dark heat" ng-click="SET_MODE('Heat')">
+                    <div class="icon-wrapper">
+                        <div>
+                            <i class="s-icon ac-heat"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1-{{NOF_MODES}}" ng-show="IS_VALID_MODES['Cool']">
+                <div class="button-dark cool" ng-click="SET_MODE('Cool')">
+                    <div class="icon-wrapper">
+                        <div>
+                            <i class="s-icon ac-cool"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1-{{NOF_MODES}}" ng-show="IS_VALID_MODES['Eco']">
+                <div class="button-dark" ng-click="SET_MODE('Eco')">
+                    <div class="icon-wrapper">
+                        <div>
+                            <i class="s-icon ac-eco"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1-{{NOF_MODES}}" ng-show="IS_VALID_MODES['Auto']">
+                <div class="button-dark generic" ng-click="SET_MODE('Auto')">
+                    <div class="icon-wrapper">
+                        <div>
+                            <i class="s-icon ac-sumwin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid command-row raiselower command-thermo" ng-if="hasSET_SETPOINT">
+            <div class="col-1-2">
+                <div class="setpoint button-dark disabled">
+                    <span class="type">SETPOINT:</span>
+                    <span class="level" ng-if="setValue['SETPOINT']===null" ng-bind="resource.state['SETPOINT']+'°'+units.temperature"></span>
+                    <span class="level blink" ng-if="!(setValue['SETPOINT']===null)" ng-bind="setValue['SETPOINT']+'°'+units.temperature"></span>
+                </div>
+            </div>
+            <div class="col-1-4" ng-if="hasSET_SETPOINT">
+                <div class="button-dark setUp" hm-tap="CHANGE_SETPOINT(+1)">
+                    <div class="icon-wrapper">
+                        <div class="has-glyphicon">
+                            <i class="glyphicon glyphicon-chevron-up"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1-4" ng-if="hasSET_SETPOINT">
+                <div class="button-dark setDown" hm-tap="CHANGE_SETPOINT(-1)">
+                    <div class="icon-wrapper">
+                        <div class="has-glyphicon">
+                            <i class="glyphicon glyphicon-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid command-row raiselower command-thermo" ng-if="hasSET_HEAT_SP">
+        <div class="col-1-2">
+            <div class="button-dark disabled">
+                <div class="temperature setpoint heat">
+                    <span class="type">HEAT SP:</span>
+                    <span class="level" ng-if="setValue['HEAT SP']===null" ng-bind="resource.state['HEAT SP']+'°'+units.temperature"></span>
+                    <span class="level blink" ng-if="!(setValue['HEAT SP']===null)" ng-bind="setValue['HEAT SP']+'°'+units.temperature"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-1-4">
+            <div class="button-dark heatUp" ng-disabled="hasSET_HEAT_SP" hm-tap="CHANGE_HEAT_SP(1)">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon">
+                        <i class="glyphicon glyphicon-chevron-up"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-1-4">
+            <div class="button-dark heatDown" ng-disabled="hasSET_HEAT_SP" hm-tap="CHANGE_HEAT_SP(-1)">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon">
+                        <i class="glyphicon glyphicon-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid command-row raiselower command-thermo" ng-if="hasSET_COOL_SP">
+        <div class="col-1-2">
+            <div class="button-dark disabled">
+                <div class="temperature setpoint bottom cool">
+                    <span class="type">COOL SP:</span>
+                    <span class="level" ng-if="setValue['COOL SP']===null" ng-bind="resource.state['COOL SP']+'°'+units.temperature"></span>
+                    <span class="level blink" ng-if="!(setValue['COOL SP']===null)" ng-bind="setValue['COOL SP']+'°'+units.temperature"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-1-4">
+            <div class="button-dark coolUp" ng-disabled="hasSET_COOL_SP" hm-tap="CHANGE_COOL_SP(1)">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon">
+                        <i class="glyphicon glyphicon-chevron-up"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-1-4">
+            <div class="button-dark coolDown" ng-disabled="hasSET_COOL_SP" hm-tap="CHANGE_COOL_SP(-1)">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon">
+                        <i class="glyphicon glyphicon-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -9,6 +9,6 @@
   "integration_type": "hub",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/djerik/beolink-ha/issues",
-  "requirements": ["aiohttp_basicauth", "jsonpickle"],
-  "version": "1.0.5"
+  "requirements": ["aiohttp_basicauth==1.1.0", "jsonpickle==4.1.1"],
+  "version": "1.1.0"
 }

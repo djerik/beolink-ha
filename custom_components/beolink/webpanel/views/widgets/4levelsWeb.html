@@ -1,0 +1,54 @@
+<div class="button-wrapper disabled">
+    <div class="button-content">
+        <div class="button-state">
+            <div class="icon-wrapper side-state">
+                <div class="bottom">
+                    <i class="resource-icon light off"></i>
+                </div>
+            </div>
+        </div>
+        <div class="button-label wrap-text dsg-text">
+            <span ng-bind="resource.name"></span>
+        </div>
+    </div>
+</div>
+<div class="commands">
+    <div class="grid command-row span5 hideIfNoFocus command-dimmer-wo">
+        <div class="col-1-4">
+            <div class="button-dark off" title="off" ng-click="SET(0)">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon has-glyphicon-four-levels">
+                        <span class="glyphicon">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-1-4">
+            <div class="button-dark thirtythree" title="33%" ng-click="SET(33)">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon has-glyphicon-four-levels">
+                        <span class="glyphicon">33%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-1-4">
+            <div class="button-dark sixtysix" title="66%" ng-click="SET(66)">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon has-glyphicon-four-levels">
+                        <span class="glyphicon">66%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-1-4 100">
+            <div class="button-dark hundred" ng-disabled="hasSET" title="100%" ng-click="SET(100)">
+                <div class="icon-wrapper">
+                    <div class="has-glyphicon has-glyphicon-four-levels">
+                        <span class="glyphicon">100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

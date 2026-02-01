@@ -1,10 +1,7 @@
-"""Module for casting objects."""
+"""BeoLink Gateway integration for Home Assistant."""
 import asyncio
-import socket
-import time
 
 from aiohttp import web
-from zeroconf import ServiceInfo
 
 from homeassistant import config_entries, core
 from homeassistant.components import zeroconf
@@ -18,75 +15,128 @@ from homeassistant.helpers.entityfilter import (
 from .blgwserver import BLGWServer, CustomBasicAuth
 from .const import CONF_INCLUDE_EXCLUDE_MODE, CONF_SERIAL_NUMBER, DOMAIN
 from .hipserver import HIPServer
+from .zeroconf_services import (
+    BeoLinkServiceConfig,
+    create_hip_service_info,
+    create_tvpanel_service_info,
+    get_local_ip,
+)
+
+# Default ports
+DEFAULT_HTTP_PORT = 80
+DEFAULT_HIP_PORT = 9100
 
 
-async def async_setup_entry(hass: core.HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
+async def async_setup_entry(
+    hass: core.HomeAssistant, entry: config_entries.ConfigEntry
+) -> bool:
     """Set up BeoLink from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
+    http_port = entry.options.get(CONF_PORT, DEFAULT_HTTP_PORT)
+
+    # Start HIP server
     loop = asyncio.get_running_loop()
-    hipserver = await loop.create_server(lambda: HIPServer(entry.options[CONF_INCLUDE_ENTITIES],entry.options[CONF_EXCLUDE_ENTITIES],entry.options[CONF_INCLUDE_EXCLUDE_MODE],hass), None, 9100)
-
-    auth = CustomBasicAuth(hass.auth.auth_providers)
-    server = BLGWServer(entry.options[CONF_NAME],entry.options[CONF_SERIAL_NUMBER],entry.options[CONF_INCLUDE_ENTITIES],entry.options[CONF_EXCLUDE_ENTITIES],entry.options[CONF_INCLUDE_EXCLUDE_MODE], hass)
-    app = web.Application(middlewares=[auth])
-    app.router.add_routes( [web.get('/blgwpservices.json', server.blgwpservices),web.get('/a/view/House/{zone}/CAMERA/{camera_name}/mjpeg', server.camera_mjpeg)] )
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite( runner, None, entry.options.get( CONF_PORT, 80))
-    await site.start()
-
-    hass.data[DOMAIN][entry.entry_id] = {'BLGWServer' : site, 'HIPServer' : hipserver}
-
-    zeroconf_instance = await zeroconf.async_get_instance(hass)
-
-    uuid = await instance_id.async_get(hass)
-
-    desc = {
-        "hipport": "9100",
-        "path": "/blgwpservices.json",
-        "project": entry.options[CONF_NAME],
-        "protover": "2",
-        "sn": entry.options[CONF_SERIAL_NUMBER],
-        "swver": "1.5.4.557",
-        "timestamp": int(time.time()),
-    }
-
-    local_address = get_local_address()
-
-    info = ServiceInfo(
-        "_hipservices._tcp.local.",
-        "BLGW (blgw) | "+entry.options[CONF_NAME]+"._hipservices._tcp.local.",
-        addresses=[socket.inet_aton(local_address)],
-        port=80,
-        properties=desc,
-        server= uuid+".local.",
+    hipserver = await loop.create_server(
+        lambda: HIPServer(
+            entry.options[CONF_INCLUDE_ENTITIES],
+            entry.options[CONF_EXCLUDE_ENTITIES],
+            entry.options[CONF_INCLUDE_EXCLUDE_MODE],
+            hass,
+        ),
+        None,
+        DEFAULT_HIP_PORT,
     )
 
-    await zeroconf_instance.async_register_service(info, allow_name_change=True)
+    # Start HTTP server
+    auth = CustomBasicAuth(hass.auth.auth_providers)
+    server = BLGWServer(
+        entry.options[CONF_NAME],
+        entry.options[CONF_SERIAL_NUMBER],
+        entry.options[CONF_INCLUDE_ENTITIES],
+        entry.options[CONF_EXCLUDE_ENTITIES],
+        entry.options[CONF_INCLUDE_EXCLUDE_MODE],
+        hass,
+    )
+    app = web.Application(middlewares=[auth])
+    app.router.add_routes([
+        web.get('/blgwpservices.json', server.blgwpservices),
+        web.get('/a/view/House/{zone}/CAMERA/{camera_name}/mjpeg', server.camera_mjpeg),
+        web.get('/a/webview/{area}/{zone}/CAMERA/{camera_name}/snapshot',
+                server.camera_snapshot),
+        web.get('/a/exe/{area}/{zone}/{type}/{resource}/{command}',
+                server.execute_command),
+        web.get('/a/model/{resource:.*}', server.model_api),
+        web.post('/a/model/{resource:.*}', server.model_api),
+        web.put('/a/model/{resource:.*}', server.model_api),
+        web.get('/webpanel/', server.webpanel_index_html),
+        web.get('/webpanel/index.html', server.webpanel_index_html),
+        web.get('/webpanel/index.xhtml', server.webpanel_index),
+        web.get('/webpanel/{resource:.*}', server.webpanel_static),
+        web.get('/common/{resource:.*}', server.common_static),
+        web.route('*', '/{path:.*}', server.catch_all_handler),
+    ])
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, None, http_port)
+    await site.start()
 
-    # Store service info for cleanup
-    hass.data[DOMAIN][entry.entry_id]['zeroconf_info'] = info
+    # Store servers for cleanup
+    hass.data[DOMAIN][entry.entry_id] = {
+        'BLGWServer': site,
+        'HIPServer': hipserver,
+        'zeroconf_services': [],
+    }
+
+    # Register zeroconf services
+    zeroconf_instance = await zeroconf.async_get_instance(hass)
+    uuid = await instance_id.async_get(hass)
+    local_address = get_local_ip()
+
+    service_config = BeoLinkServiceConfig(
+        name=entry.options[CONF_NAME],
+        serial_number=str(entry.options[CONF_SERIAL_NUMBER]),
+        host=local_address,
+        port=http_port,
+        hip_port=DEFAULT_HIP_PORT,
+        instance_id=uuid,
+        register_tvpanel=True,
+    )
+
+    # Register HIP service (main BLGW discovery service)
+    hip_service = create_hip_service_info(service_config)
+    await zeroconf_instance.async_register_service(hip_service, allow_name_change=True)
+    hass.data[DOMAIN][entry.entry_id]['zeroconf_services'].append(hip_service)
+
+    # Register TV panel service (for B&O TVs to discover webpanel)
+    tvpanel_service = create_tvpanel_service_info(service_config)
+    await zeroconf_instance.async_register_service(
+        tvpanel_service, allow_name_change=True
+    )
+    hass.data[DOMAIN][entry.entry_id]['zeroconf_services'].append(tvpanel_service)
 
     return True
 
 
 async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
     """Set up the BeoLink component."""
-    # @TODO: Add setup code.
     return True
 
 
-async def async_unload_entry(hass: core.HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
+async def async_unload_entry(
+    hass: core.HomeAssistant, entry: config_entries.ConfigEntry
+) -> bool:
     """Unload a config entry."""
-    # Unregister zeroconf service
+    # Unregister zeroconf services
     zeroconf_instance = await zeroconf.async_get_instance(hass)
-    info = hass.data[DOMAIN][entry.entry_id].get('zeroconf_info')
-    if info:
-        await zeroconf_instance.async_unregister_service(info)
+    for service in hass.data[DOMAIN][entry.entry_id].get('zeroconf_services', []):
+        await zeroconf_instance.async_unregister_service(service)
 
+    # Stop HTTP server
     site: web.TCPSite = hass.data[DOMAIN][entry.entry_id]['BLGWServer']
     await site.stop()
+
+    # Stop HIP server
     hipserver: asyncio.Server = hass.data[DOMAIN][entry.entry_id]['HIPServer']
     hipserver.close()
     await hipserver.wait_closed()
@@ -95,18 +145,3 @@ async def async_unload_entry(hass: core.HomeAssistant, entry: config_entries.Con
     hass.data[DOMAIN].pop(entry.entry_id)
 
     return True
-
-def get_local_address() -> str:
-    """Grabs the local IP address using a socket.
-
-    :return: Local IP Address in IPv4 format.
-    :rtype: str
-    """
-    # TODO: try not to talk 8888 for this
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(("8.8.8.8", 80))
-        addr = s.getsockname()[0]
-    finally:
-        s.close()
-    return str(addr)

@@ -1,3 +1,5 @@
+"""Constants for the BeoLink integration."""
+
 DOMAIN = "beolink"
 
 CONF_SERIAL_NUMBER = "serial_number"

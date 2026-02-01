@@ -1,0 +1,53 @@
+<div ng-init="toEcomode='Eco Mode'" data-ng-init="toSchedule='Schedule'" class="thermostat">
+    <div class="button-wrapper disabled">
+        <div class="button-content">
+            <div class="icon-wrapper side-state" ng-class="resource.state.MODE == 'Off'?'off':'on'">
+                <div ng-switch="resource.state.MODE">
+                    <i ng-switch-when="Heat" class="resource-icon climate-heat"></i>
+                    <i ng-switch-when="Cool" class="resource-icon climate-cool"></i>
+                    <i ng-switch-when="Auto" class="resource-icon climate-auto"></i>
+                    <i ng-switch-when="Em.Heat" class="resource-icon climate-heat"></i>
+                    <i ng-switch-when="Eco" class="resource-icon climate-eco"></i>
+                    <i ng-switch-default="" class="resource-icon climate-auto"></i>
+                </div>
+            </div>
+            <div class="button-label">
+                <span ng-bind="resource.name" class="wrap-text dsg-text"></span>
+            </div>
+            <div class="button-state-right">
+                <div class="temperature" ng-if="resource.state['TEMPERATURE']  > -273">
+                    <span ng-bind="resource.state['TEMPERATURE']+'°'"></span>
+                    <div class="icon-wrapper">
+                        <i class="resource-icon-s climate-thermostat on"></i>
+                    </div>
+                </div>
+                <div class="temperature setpoint" ng-if="resource.state['SETPOINT']  > -273">
+                    <span class="temperature" ng-if="setValue['SETPOINT']===null" ng-bind="resource.state['SETPOINT']+'°'+units.temperature"></span>
+                    <span class="temperature blink" ng-if="!(setValue['SETPOINT']===null)" ng-bind="setValue['SETPOINT']+'°'+units.temperature"></span>
+                    <div class="icon-wrapper" ng-switch="resource.state.MODE">
+                        <i ng-switch-when="Heat" class="resource-icon-s on climate-heat"></i>
+                        <i ng-switch-when="Cool" class="resource-icon-s on climate-cool"></i>
+                        <i ng-switch-when="Auto" class="resource-icon-s on climate-auto"></i>
+                        <i ng-switch-when="Eco" class="resource-icon climate-eco"></i>
+                        <i ng-switch-when="Em.Heat" class="resource-icon-s on climate-heat"></i>
+                        <i ng-switch-default="" class="resource-icon-s on climate-auto"></i>
+                    </div>
+                </div>
+                <div class="temperature setpoint heat" ng-if="resource.state['HEAT SP']  > -273">
+                    <span class="temperature" ng-if="setValue['HEAT SP']===null" ng-bind="resource.state['HEAT SP']+'°'"></span>
+                    <span class="temperature blink" ng-if="!(setValue['HEAT SP']===null)" ng-bind="setValue['HEAT SP']+'°'"></span>
+                    <div class="icon-wrapper">
+                        <i class="resource-icon-s on climate-heat"></i>
+                    </div>
+                </div>
+                <div class="temperature setpoint bottom cool" ng-if="resource.state['COOL SP'] > -273">
+                    <span class="temperature" ng-if="setValue['COOL SP']===null" ng-bind="resource.state['COOL SP']+'°'"></span>
+                    <span class="temperature blink" ng-if="!(setValue['COOL SP']===null)" ng-bind="setValue['COOL SP']+'°'"></span>
+                    <div class="icon-wrapper">
+                        <i class="resource-icon-s on climate-cool"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,742 @@
+@import 'sprites.css';
+/* zones sprits are render in a 80x80 grid but they are of 40x40 more or less
+ * so:
+ */
+i.zone-icon {
+  background: url(spritesIconsResources.png) no-repeat top left;
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+}
+i.zone-icon {
+  background-position: -20px -20px;
+}
+i.active.zone-icon,
+.active i.zone-icon {
+  background-position: -20px -340px;
+}
+i.zone-icon.mastersuite {
+  background-position: -100px -20px;
+}
+i.zone-icon.swimmingpool {
+  background-position: -580px -20px;
+}
+i.zone-icon.bathroom {
+  background-position: -20px -20px;
+}
+i.zone-icon.kitchen {
+  background-position: -740px -20px;
+}
+i.zone-icon.living {
+  background-position: -180px -20px;
+}
+i.zone-icon.dining {
+  background-position: -260px -20px;
+}
+i.zone-icon.playroom {
+  background-position: -500px -20px;
+}
+i.zone-icon.hometheater {
+  background-position: -420px -20px;
+}
+i.zone-icon.garden {
+  background-position: -660px -20px;
+}
+i.zone-icon.garaje {
+  background-position: -100px -20px;
+}
+i.zone-icon.suite {
+  background-position: -180px -20px;
+}
+i.zone-icon.suite_girl {
+  background-position: -100px -100px;
+}
+i.zone-icon.suite_boy {
+  background-position: -100px -180px;
+}
+i.zone-icon.suite_1 {
+  background-position: -180px -100px;
+}
+i.zone-icon.suite_2 {
+  background-position: -180px -180px;
+}
+i.zone-icon.suite_3 {
+  background-position: -180px -260px;
+}
+i.zone-icon.suite_4 {
+  background-position: -180px -340px;
+}
+i.zone-icon.suite_5 {
+  background-position: -180px -420px;
+}
+i.zone-icon.suite_6 {
+  background-position: -180px -500px;
+}
+i.zone-icon.suite_7 {
+  background-position: -180px -580px;
+}
+i.zone-icon.suite_8 {
+  background-position: -180px -660px;
+}
+i.zone-icon.suite_9 {
+  background-position: -180px -740px;
+}
+i.zone-icon.suite_10 {
+  background-position: -180px -820px;
+}
+i.zone-icon.guest_suite {
+  background-position: -260px -20px;
+}
+i.zone-icon.guest_suite_1 {
+  background-position: -260px -100px;
+}
+i.zone-icon.guest_suite_2 {
+  background-position: -260px -180px;
+}
+i.zone-icon.guest_suite_3 {
+  background-position: -260px -260px;
+}
+i.zone-icon.guest_suite_4 {
+  background-position: -260px -340px;
+}
+i.zone-icon.guest_suite_5 {
+  background-position: -260px -420px;
+}
+i.zone-icon.guest_suite_6 {
+  background-position: -260px -500px;
+}
+i.zone-icon.guest_suite_7 {
+  background-position: -260px -580px;
+}
+i.zone-icon.guest_suite_8 {
+  background-position: -260px -660px;
+}
+i.zone-icon.guest_suite_9 {
+  background-position: -260px -740px;
+}
+i.zone-icon.guest_suite_10 {
+  background-position: -260px -820px;
+}
+i.active.zone-icon.mastersuite,
+.active i.zone-icon.mastersuite {
+  background-position: -100px -340px;
+}
+i.active.zone-icon.swimmingpool,
+.active i.zone-icon.swimmingpool {
+  background-position: -580px -340px;
+}
+i.active.zone-icon.bathroom,
+.active i.zone-icon.bathroom {
+  background-position: -20px -340px;
+}
+i.active.zone-icon.kitchen,
+.active i.zone-icon.kitchen {
+  background-position: -740px -340px;
+}
+i.active.zone-icon.living,
+.active i.zone-icon.living {
+  background-position: -180px -340px;
+}
+i.active.zone-icon.dining,
+.active i.zone-icon.dining {
+  background-position: -260px -340px;
+}
+i.active.zone-icon.playroom,
+.active i.zone-icon.playroom {
+  background-position: -500px -340px;
+}
+i.active.zone-icon.hometheater,
+.active i.zone-icon.hometheater {
+  background-position: -420px -340px;
+}
+i.active.zone-icon.garden,
+.active i.zone-icon.garden {
+  background-position: -660px -340px;
+}
+i.active.zone-icon.garaje,
+.active i.zone-icon.garaje {
+  background-position: -100px -340px;
+}
+i.active.zone-icon.suite,
+.active i.zone-icon.suite {
+  background-position: -180px -340px;
+}
+i.active.zone-icon.suite_girl,
+.active i.zone-icon.suite_girl {
+  background-position: -100px -420px;
+}
+i.active.zone-icon.suite_boy,
+.active i.zone-icon.suite_boy {
+  background-position: -100px -500px;
+}
+i.active.zone-icon.suite_1,
+.active i.zone-icon.suite_1 {
+  background-position: -180px -420px;
+}
+i.active.zone-icon.suite_2,
+.active i.zone-icon.suite_2 {
+  background-position: -180px -500px;
+}
+i.active.zone-icon.suite_3,
+.active i.zone-icon.suite_3 {
+  background-position: -180px -580px;
+}
+i.active.zone-icon.suite_4,
+.active i.zone-icon.suite_4 {
+  background-position: -180px -660px;
+}
+i.active.zone-icon.suite_5,
+.active i.zone-icon.suite_5 {
+  background-position: -180px -740px;
+}
+i.active.zone-icon.suite_6,
+.active i.zone-icon.suite_6 {
+  background-position: -180px -820px;
+}
+i.active.zone-icon.suite_7,
+.active i.zone-icon.suite_7 {
+  background-position: -180px -900px;
+}
+i.active.zone-icon.suite_8,
+.active i.zone-icon.suite_8 {
+  background-position: -180px -980px;
+}
+i.active.zone-icon.suite_9,
+.active i.zone-icon.suite_9 {
+  background-position: -180px -1060px;
+}
+i.active.zone-icon.suite_10,
+.active i.zone-icon.suite_10 {
+  background-position: -180px -1140px;
+}
+i.active.zone-icon.guest_suite,
+.active i.zone-icon.guest_suite {
+  background-position: -260px -340px;
+}
+i.active.zone-icon.guest_suite_1,
+.active i.zone-icon.guest_suite_1 {
+  background-position: -260px -420px;
+}
+i.active.zone-icon.guest_suite_2,
+.active i.zone-icon.guest_suite_2 {
+  background-position: -260px -500px;
+}
+i.active.zone-icon.guest_suite_3,
+.active i.zone-icon.guest_suite_3 {
+  background-position: -260px -580px;
+}
+i.active.zone-icon.guest_suite_4,
+.active i.zone-icon.guest_suite_4 {
+  background-position: -260px -660px;
+}
+i.active.zone-icon.guest_suite_5,
+.active i.zone-icon.guest_suite_5 {
+  background-position: -260px -740px;
+}
+i.active.zone-icon.guest_suite_6,
+.active i.zone-icon.guest_suite_6 {
+  background-position: -260px -820px;
+}
+i.active.zone-icon.guest_suite_7,
+.active i.zone-icon.guest_suite_7 {
+  background-position: -260px -900px;
+}
+i.active.zone-icon.guest_suite_8,
+.active i.zone-icon.guest_suite_8 {
+  background-position: -260px -980px;
+}
+i.active.zone-icon.guest_suite_9,
+.active i.zone-icon.guest_suite_9 {
+  background-position: -260px -1060px;
+}
+i.active.zone-icon.guest_suite_10,
+.active i.zone-icon.guest_suite_10 {
+  background-position: -260px -1140px;
+}
+i.zone-icon-s {
+  background: url(spritesIconsZones-ss-grey.png) no-repeat top left;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  background-position: -10px -10px;
+}
+.selected > i.zone-icon-s,
+.active > i.zone-icon-s,
+i.zone-icon-s.active {
+  background: url(spritesIconsZones-ss-silver.png) no-repeat top left;
+  background-position: -10px -10px;
+}
+i.zone-icon-s.house {
+  background-position: -10px -10px;
+}
+i.zone-icon-s.guest_house {
+  background-position: -60px -10px;
+}
+i.zone-icon-s.garage {
+  background-position: -110px -10px;
+}
+i.zone-icon-s.living {
+  background-position: -160px -10px;
+}
+i.zone-icon-s.dining {
+  background-position: -210px -10px;
+}
+i.zone-icon-s.hometheater {
+  background-position: -310px -10px;
+}
+i.zone-icon-s.playroom {
+  background-position: -360px -10px;
+}
+i.zone-icon-s.swimmingpool {
+  background-position: -410px -10px;
+}
+i.zone-icon-s.garden {
+  background-position: -460px -10px;
+}
+i.zone-icon-s.kitchen {
+  background-position: -510px -10px;
+}
+i.zone-icon-s.mastersuite {
+  background-position: -10px -60px;
+}
+i.zone-icon-s.suite {
+  background-position: -60px -60px;
+}
+i.zone-icon-s.suite_1 {
+  background-position: -60px -60px;
+}
+i.zone-icon-s.suite_2 {
+  background-position: -110px -60px;
+}
+i.zone-icon-s.suite_3 {
+  background-position: -160px -60px;
+}
+i.zone-icon-s.suite_4 {
+  background-position: -210px -60px;
+}
+i.zone-icon-s.suite_5 {
+  background-position: -260px -60px;
+}
+i.zone-icon-s.suite_6 {
+  background-position: -310px -60px;
+}
+i.zone-icon-s.suite_7 {
+  background-position: -360px -60px;
+}
+i.zone-icon-s.suite_8 {
+  background-position: -410px -60px;
+}
+i.zone-icon-s.suite_9 {
+  background-position: -460px -60px;
+}
+i.zone-icon-s.suite_10 {
+  background-position: -510px -60px;
+}
+i.zone-icon-s.guest_suite {
+  background-position: -60px -110px;
+}
+i.zone-icon-s.guest_suite_1 {
+  background-position: -60px -110px;
+}
+i.zone-icon-s.guest_suite_2 {
+  background-position: -110px -110px;
+}
+i.zone-icon-s.guest_suite_3 {
+  background-position: -160px -110px;
+}
+i.zone-icon-s.guest_suite_4 {
+  background-position: -210px -110px;
+}
+i.zone-icon-s.guest_suite_5 {
+  background-position: -260px -110px;
+}
+i.zone-icon-s.guest_suite_6 {
+  background-position: -310px -110px;
+}
+i.zone-icon-s.guest_suite_7 {
+  background-position: -360px -110px;
+}
+i.zone-icon-s.guest_suite_8 {
+  background-position: -410px -110px;
+}
+i.zone-icon-s.guest_suite_9 {
+  background-position: -460px -110px;
+}
+i.zone-icon-s.guest_suite_10 {
+  background-position: -510px -110px;
+}
+i.zone-icon-s.suite_girl {
+  background-position: -10px -160px;
+}
+i.zone-icon-s.suite_boy {
+  background-position: -60px -160px;
+}
+i.zone-icon-s.office {
+  background-position: -110px -160px;
+}
+i.zone-icon-s.office_2 {
+  background-position: -160px -160px;
+}
+i.zone-icon-s.office_3 {
+  background-position: -210px -160px;
+}
+i.zone-icon-s.wine_cellar {
+  background-position: -260px -160px;
+}
+i.zone-icon-s.gym {
+  background-position: -310px -160px;
+}
+i.zone-icon-s.cigar_lounge {
+  background-position: -360px -160px;
+}
+i.zone-icon-s.sauna {
+  background-position: -410px -160px;
+}
+i.zone-icon-s.steam_room {
+  background-position: -460px -160px;
+}
+i.zone-icon-s.safe_room {
+  background-position: -510px -160px;
+}
+i.zone-icon-s.masterbathroom {
+  background-position: -10px -210px;
+}
+i.zone-icon-s.bathroom {
+  background-position: -60px -210px;
+}
+i.zone-icon-s.bathroom_2 {
+  background-position: -110px -210px;
+}
+i.zone-icon-s.bathroom_3 {
+  background-position: -160px -210px;
+}
+i.zone-icon-s.bathroom_4 {
+  background-position: -210px -210px;
+}
+i.zone-icon-s.bathroom_5 {
+  background-position: -260px -210px;
+}
+i.zone-icon-s.bathroom_6 {
+  background-position: -310px -210px;
+}
+i.zone-icon-s.bathroom_7 {
+  background-position: -360px -210px;
+}
+i.zone-icon-s.bathroom_8 {
+  background-position: -410px -210px;
+}
+i.zone-icon-s.bathroom_9 {
+  background-position: -460px -210px;
+}
+i.zone-icon-s.bathroom_10 {
+  background-position: -510px -210px;
+}
+i.zone-icon-s.panic_room {
+  background-position: -10px -260px;
+}
+i.zone-icon-s.dresser {
+  background-position: -60px -260px;
+}
+i.zone-icon-s.dresser_2 {
+  background-position: -110px -260px;
+}
+i.zone-icon-s.dresser_3 {
+  background-position: -160px -260px;
+}
+i.zone-icon-s.jacuzzi {
+  background-position: -210px -260px;
+}
+i.zone-icon-s.bar {
+  background-position: -260px -260px;
+}
+i.zone-icon-s.terrace {
+  background-position: -310px -260px;
+}
+i.zone-icon-s.play_room_2 {
+  background-position: -360px -260px;
+}
+i.zone-icon-s.bowling_room {
+  background-position: -410px -260px;
+}
+i.zone-icon-s.butler {
+  background-position: -460px -260px;
+}
+i.zone-icon-s.wine_tasting {
+  background-position: -510px -260px;
+}
+i.zone-icon-s.spa {
+  background-position: -10px -310px;
+}
+i.zone-icon-s.bbq {
+  background-position: -60px -310px;
+}
+i.zone-icon-s.grill {
+  background-position: -110px -310px;
+}
+i.zone-icon-s.music_room {
+  background-position: -160px -310px;
+}
+i.zone-icon-s.putting_green {
+  background-position: -210px -310px;
+}
+i.zone-icon-s.wet_bar {
+  background-position: -260px -310px;
+}
+i.zone-icon-s.art_gallery {
+  background-position: -310px -310px;
+}
+i.zone-icon-s.attic {
+  background-position: -360px -310px;
+}
+i.zone-icon-s.trophy_room {
+  background-position: -410px -310px;
+}
+i.zone-icon-s.boat_house {
+  background-position: -460px -310px;
+}
+i.resource-icon {
+  background: url(spritesIconsResources-off.png) no-repeat top left;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+}
+i.resource-icon {
+  background-position: -10px -10px;
+}
+i.on.resource-icon,
+.on i.resource-icon,
+i.active.resource-icon {
+  background-position: -10px -10px;
+  background: url(spritesIconsResources-on.png) no-repeat top left;
+}
+i.resource-icon.light,
+i.resource-icon.dimmer {
+  background-position: -10px -10px;
+}
+i.resource-icon.shade {
+  background-position: -110px -10px;
+}
+i.resource-icon.button {
+  background-position: -160px -10px;
+}
+i.resource-icon.climate-dehum {
+  background-position: -210px -10px;
+}
+i.resource-icon.climate-thermostat {
+  background-position: -60px -10px;
+}
+i.resource-icon.climate-fan {
+  background-position: -160px -110px;
+}
+i.resource-icon.climate-heat {
+  background-position: -10px -110px;
+}
+i.resource-icon.climate-cool {
+  background-position: -60px -110px;
+}
+i.resource-icon.climate-auto {
+  background-position: -10px -160px;
+}
+i.resource-icon.circle {
+  background-position: -160px -10px;
+}
+i.command-icon {
+  background: url(spritesIconsCommands.png) no-repeat top left;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  background-position: -38px -8px;
+}
+i.command-icon {
+  background-position: -38px -8px;
+}
+i.command-icon.fforward {
+  background-position: -128px -38px;
+}
+i.command-icon.rewind {
+  background-position: -158px -38px;
+}
+i.command-icon.step-up {
+  background-position: -8px -98px;
+}
+i.command-icon.step-down {
+  background-position: -38px -98px;
+}
+i.command-icon.go {
+  background-position: -38px -8px;
+}
+i.command-icon.go-red {
+  background-position: -8px -8px;
+}
+i.resource-icon-s {
+  background: url(spritesIconsResources-off-s.png) no-repeat top left;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+}
+i.resource-icon-s {
+  background-position: -7px -7px;
+}
+i.on.resource-icon-s,
+.on i.resource-icon-s,
+i.active.resource-icon-s,
+.active i.resource-icon-s {
+  background-position: -7px -7px;
+  background: url(spritesIconsResources-on-s.png) no-repeat top left;
+}
+i.resource-icon-s.light,
+i.resource-icon-s.dimmer {
+  background-position: -7px -7px;
+}
+i.resource-icon-s.shade {
+  background-position: -67px -7px;
+}
+i.resource-icon-s.button {
+  background-position: -97px -7px;
+}
+i.resource-icon-s.climate-dehum {
+  background-position: -127px -7px;
+}
+i.resource-icon-s.climate-thermostat {
+  background-position: -37px -7px;
+}
+i.resource-icon-s.climate-fan {
+  background-position: -97px -67px;
+}
+i.resource-icon-s.climate-heat {
+  background-position: -7px -67px;
+}
+i.resource-icon-s.climate-cool {
+  background-position: -37px -67px;
+}
+i.resource-icon-s.climate-auto {
+  background-position: -7px -97px;
+}
+.off i.s-icon.ac-eco {
+  background: url(sprite_eco_mode-s.png) no-repeat top left;
+  width: 25px;
+  height: 25px;
+  background-position: -25px 0px;
+}
+i.s-icon.ac-eco {
+  background: url(sprite_eco_mode-s.png) no-repeat top left;
+  width: 25px;
+  height: 25px;
+  background-position: 0px 0px;
+}
+i.m-icon.off.ac-eco,
+.off i.m-icon.ac-eco {
+  background: url(sprite_eco_mode-m.png) no-repeat top left;
+  width: 30px;
+  height: 30px;
+  background-position: -45px -5px;
+}
+i.m-icon.ac-eco {
+  background: url(sprite_eco_mode-m.png) no-repeat top left;
+  width: 30px;
+  height: 30px;
+  background-position: -5px -5px;
+}
+i.resource-icon.climate-eco {
+  background: url(sprite_eco_mode-m.png) no-repeat top left;
+  width: 30px;
+  height: 30px;
+  background-position: -45px -5px;
+}
+.on i.resource-icon.climate-eco {
+  background: url(sprite_eco_mode-m.png) no-repeat top left;
+  width: 30px;
+  height: 30px;
+  background-position: -5px -5px;
+}
+i.flow-icon-s {
+  background: url(flow_control.png) no-repeat top left;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+}
+i.flow-icon-s:before {
+  content: ' ';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+i.flow-icon-s.black.rewind {
+  background-position: -10px -10px;
+}
+i.flow-icon-s.black.play {
+  background-position: -60px -10px;
+}
+i.flow-icon-s.black.wind {
+  background-position: -110px -10px;
+}
+i.flow-icon-s.black.prev {
+  background-position: -10px -60px;
+}
+i.flow-icon-s.black.next {
+  background-position: -10px -110px;
+}
+i.flow-icon-s.black.pause {
+  background-position: -60px -60px;
+}
+i.flow-icon-s.black.vol_incress {
+  background-position: -110px -60px;
+}
+i.flow-icon-s.black.vol_decress {
+  background-position: -110px -110px;
+}
+i.flow-icon-s.rewind {
+  background-position: -10px -160px;
+}
+i.flow-icon-s.play {
+  background-position: -60px -160px;
+}
+i.flow-icon-s.wind {
+  background-position: -110px -160px;
+}
+i.flow-icon-s.prev {
+  background-position: -10px -210px;
+}
+i.flow-icon-s.next {
+  background-position: -10px -260px;
+}
+i.flow-icon-s.pause {
+  background-position: -60px -210px;
+}
+i.flow-icon-s.vol_incress {
+  background-position: -110px -210px;
+}
+i.flow-icon-s.vol_decress {
+  background-position: -110px -260px;
+}
+i.flow-icon-s.grey.rewind {
+  background-position: -10px -310px;
+}
+i.flow-icon-s.grey.play {
+  background-position: -60px -310px;
+}
+i.flow-icon-s.grey.wind {
+  background-position: -110px -310px;
+}
+i.flow-icon-s.grey.prev {
+  background-position: -10px -360px;
+}
+i.flow-icon-s.grey.next {
+  background-position: -10px -410px;
+}
+i.flow-icon-s.grey.pause {
+  background-position: -60px -360px;
+}
+i.flow-icon-s.grey.vol_incress {
+  background-position: -110px -360px;
+}
+i.flow-icon-s.grey.vol_decress {
+  background-position: -110px -410px;
+}
+i.flow-icon-s.standby {
+  background-position: -60px -410px;
+}

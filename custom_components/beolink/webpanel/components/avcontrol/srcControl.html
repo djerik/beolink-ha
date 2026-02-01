@@ -1,0 +1,69 @@
+<div class="sourceControl">
+    <hr/>
+    <ul class="ciffers">
+        <li ng-click="exec('CIFFER_9_Digit_9')">9</li>
+        <li ng-click="exec('CIFFER_8_Digit_8')">8</li>
+        <li ng-click="exec('CIFFER_7_Digit_7')">7</li>
+        <li ng-click="exec('CIFFER_6_Digit_6')">6</li>
+        <li ng-click="exec('CIFFER_5_Digit_5')">5</li>
+        <li ng-click="exec('CIFFER_4_Digit_4')">4</li>
+        <li ng-click="exec('CIFFER_3_Digit_3')">3</li>
+        <li ng-click="exec('CIFFER_2_Digit_2')">2</li>
+        <li ng-click="exec('CIFFER_1_Digit_1')">1</li>
+        <li class="label" ng-click="exec('TEXT')">TEXT</li>
+        <li ng-click="exec('CIFFER_0')">0</li>
+        <li class="label" ng-click="exec('EPG')">GUIDE</li>
+        <li class="label" ng-click="exec('BACK')">BACK</li>
+        <li class="label" ng-click="exec('INFO')">INFO</li>
+        <li class="label" ng-click="exec('MENU')">MENU</li>
+    </ul>
+    <hr/>
+    <ul class="joystick">
+        <li class="green" ng-click="exec('CNTL_REWIND_Green')" xng-click="exec('CNTL_C_REWIND_Continue_Green')">&#x2022;</li>
+        <li class="up" ng-click="exec('CURSOR_UP')">&#x25B2;</li>
+        <li class="yellow" ng-click="exec('CNTL_WIND_Yellow')" xng-click="exec('CNTL_C_WIND_Continue_Yellow')">&#x2022;</li>
+        <li class="left" ng-click="exec('CURSOR_LEFT')">&#x25C0;</li>
+        <li class="center" ng-click="exec('SELECT_Cursor_SELECT')">&#x25CB;</li>
+        <li class="right" ng-click="exec('CURSOR_RIGHT')">&#x25B6;</li>
+        <li class="red" ng-click="exec('CNTL_STEP_DW_Red')" xng-click="exec('CNTL_C_STEP_DW_Continue_Red')">&#x2022;</li>
+        <li class="down" ng-click="exec('CURSOR_DW')">&#x25BC;</li>
+        <li class="blue" ng-click="exec('CNTL_STEP_UP_Blue')" xng-click="exec('CNTL_C_STEP_UP_Continue_Blue')">&#x2022;</li>
+    </ul>
+    <hr/>
+    <ul>
+        <li ng-click="exec('REWIND')">
+            <i class="flow-icon-s rewind"></i>
+        </li>
+        <li ng-click="exec('GO_PLAY')">
+            <i class="flow-icon-s play"></i>
+        </li>
+        <li ng-click="exec('WIND')">
+            <i class="flow-icon-s wind"></i>
+        </li>
+        <li ng-click="exec('STEP_UP')">
+            <i class="flow-icon-s next"></i>
+        </li>
+        <li ng-click="exec('STOP')">
+            <i class="flow-icon-s pause"></i>
+        </li>
+        <li ng-click="exec('ANALOG_UP_1_Volume_UP')">
+            <i class="flow-icon-s vol_incress"></i>
+        </li>
+        <li ng-click="exec('STEP_DW')">
+            <i class="flow-icon-s prev"></i>
+        </li>
+        <li hm-touch="standby()" hm-hold="selectedCtrl['All_standby']()" hm-hold-opts="{holdTimeout:1000}" class="red">
+            <b>
+                <span ng-show="!showAllStandby">&#x25CB;</span>
+            </b>
+            <span ng-show="showAllStandby" class="label">
+                <small>ALL STANDBY</small>
+            </span>
+        </li>
+        <li ng-click="exec('ANALOG_DW_1_Volume_DOWN')">
+            <i class="flow-icon-s vol_decress"></i>
+        </li>
+    </ul>
+    <hr/>
+    <ul class="commands"></ul>
+</div>

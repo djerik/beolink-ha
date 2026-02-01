@@ -1,0 +1,24 @@
+<div class="button-wrapper" ng-if="resource.state.LEVEL>=0">
+    <div class="button-content">
+        <div ng-show="!!(resource.state.COLOR)" style="position:absolute; top:50%; left:9px;  margin-top: -16px; height: 32px;width:32px">
+            <div ik-color="resource.state.COLOR" ik-color-keep-bright="true" ik-color-width="100%" ik-color-height="100%" ik-color-picker-show="mode === 'color'" ik-color-picker-change="UPDATECOLOR(color)" tabindex="-1" style="width:100%;height:100%"></div>
+        </div>
+        <div class="icon-wrapper side-state" style="pointer-events: none" ng-style="{'visibility':resource.state.LEVEL>=0?'visible':'hidden'}">
+            <div class="bottom">
+                <i class="resource-icon light off"></i>
+            </div>
+            <div class="top" ng-style="{'opacity':resource.state.LEVEL/100}">
+                <i class="resource-icon light on"></i>
+            </div>
+        </div>
+        <div class="button-label wrap-text dsg-text">
+            <span>
+                <span ng-bind="resource.name"></span>
+            </span>
+        </div>
+        <div ng-if="resource.state.LEVEL>=0" class="meter-wrapper" ng-class="{selected:inWidget}">
+            <div class="meter"></div>
+        </div>
+    </div>
+</div>
+<div ng-if="!(resource.state.LEVEL>=0)" ng-include="'views/widgets/4levelsTv.html'"></div>

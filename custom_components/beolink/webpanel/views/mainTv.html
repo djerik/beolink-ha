@@ -1,0 +1,11 @@
+<div class="layout layoutTv" id="tv" ng-controller="MainCtrl">
+    <div ng-show="authService.logged * configLoaded">
+        <div data-ng-include="'views/partials/zones.html'"></div>
+        <div class="widgets-cameras-wrapper">
+            <div data-ng-include="'views/partials/widgets.html'"></div>
+            <div widget-cameras="currentZone.camerasWidget"></div>
+        </div>
+        <div data-ng-include="'views/partials/footerTv.html'"></div>
+    </div>
+    <div data-ng-include="'views/partials/login.html'"></div>
+</div>
