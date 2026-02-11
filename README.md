@@ -2,7 +2,7 @@
 
 ## Requirements
 - Port 80 available or knowledge of how to create proxy setup
-- BeoLink app installed on your iOS device
+- BeoLiving or BeoLink 2 app installed on your iOS device
 
 ## Installation
 Files are installed by downloading the files to your custom_components folder directly from here or by adding it via HACS.
