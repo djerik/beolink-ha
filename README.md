@@ -28,9 +28,7 @@ You login using your Home Assistant user name and password. If you are using Tru
 
 ## Known limitations
 - Only BeoPlay devices are supported via the BeoPlay component https://github.com/giachello/beoplay
-- Display of surveilance cameras on B&O TVs not yet implemented
-- RTSP streaming of cameras not implemented. MJPEG is working as fallback solution
-- Scenes are under implementation
+- RTSP streaming of cameras not implemented. MJPEG is working
 - Entities cannot have ? or / in the name
 - Entities with same name can cause problems
 
